@@ -1,2 +1,9 @@
-package com.example.veritrustmobile.model
+package com.example.veritrustmobile.pantallas
 
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun Comprar(){
+    Text(text = "Comprar")
+}
