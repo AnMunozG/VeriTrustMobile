@@ -15,8 +15,8 @@ fun NavGraph(navController: NavHostController) {
         composable(Rutas.Inicio.ruta) { Inicio() }
         composable(Rutas.Nosotros.ruta) { Nosotros() }
         composable(Rutas.Servicios.ruta) { Servicios() }
-        composable(Rutas.Acceder.ruta) { Acceder() }
-        composable(Rutas.Registro.ruta) { Registro() }
+        composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
+        composable(Rutas.Registro.ruta) { Registro(navController = navController) }
         composable(Rutas.Comprar.ruta) { Comprar() }
 
     }
