@@ -20,12 +20,6 @@ fun NavBar(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         TextButton(onClick = {
-            navController.navigate(Rutas.Inicio.ruta)
-            closeDrawer()
-        }) {
-            Text("Inicio")
-        }
-        TextButton(onClick = {
             navController.navigate(Rutas.Nosotros.ruta)
             closeDrawer()
         }) {

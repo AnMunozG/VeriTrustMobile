@@ -4,7 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.veritrustmobile.pantallas.*
+import com.example.veritrustmobile.pantallas.Inicio
+import com.example.veritrustmobile.pantallas.Nosotros
+import com.example.veritrustmobile.pantallas.Servicios
+import com.example.veritrustmobile.pantallas.Acceder
+import com.example.veritrustmobile.pantallas.Registro
+import com.example.veritrustmobile.pantallas.Comprar
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -12,7 +17,7 @@ fun NavGraph(navController: NavHostController) {
         navController = navController,
         startDestination = Rutas.Inicio.ruta
     ) {
-        composable(Rutas.Inicio.ruta) { Inicio() }
+        composable(Rutas.Inicio.ruta) { Inicio(navController = navController) }
         composable(Rutas.Nosotros.ruta) { Nosotros() }
         composable(Rutas.Servicios.ruta) { Servicios() }
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }

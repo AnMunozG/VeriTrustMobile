@@ -11,9 +11,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.veritrustmobile.componentes.NavBar
 import com.example.veritrustmobile.rutas.NavGraph
+import com.example.veritrustmobile.rutas.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 import kotlinx.coroutines.launch
 
@@ -22,7 +24,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            VeriTrustMobileTheme {
+            VeriTrustMobileTheme(dynamicColor = false) {
                 MainScreen()
             }
         }
@@ -33,34 +35,46 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet { // Se añade para seguir la guía de Material 3
-                NavBar(
-                    navController = navController,
-                    closeDrawer = { scope.launch { drawerState.close() } }
-                )
+    // Rutas donde NO se mostrará la barra de navegación
+    val noNavRoutes = listOf(Rutas.Inicio.ruta, Rutas.Acceder.ruta, Rutas.Registro.ruta)
+
+    if (currentRoute in noNavRoutes) {
+        // Muestra solo el contenido de la pantalla, sin Scaffold ni TopAppBar
+        NavGraph(navController = navController)
+    } else {
+        // Muestra la navegación para el resto de las pantallas
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet {
+                    NavBar(
+                        navController = navController,
+                        closeDrawer = { scope.launch { drawerState.close() } }
+                    )
+                }
             }
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("VeriTrust Mobile") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Abrir menú")
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("VeriTrust Mobile") },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Filled.Menu, contentDescription = "Abrir menú")
+                            }
                         }
-                    }
-                )
-            }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-                NavGraph(navController = navController)
+                    )
+                }
+            ) { padding ->
+                Box(modifier = Modifier.padding(padding)) {
+                    NavGraph(navController = navController)
+                }
             }
         }
     }

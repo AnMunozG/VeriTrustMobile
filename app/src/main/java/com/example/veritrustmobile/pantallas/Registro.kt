@@ -71,7 +71,8 @@ fun Registro(navController: NavHostController) {
     ) {
         Text(
             text = "Crear una cuenta",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
