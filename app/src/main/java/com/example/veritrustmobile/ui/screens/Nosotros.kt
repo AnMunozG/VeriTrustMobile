@@ -1,4 +1,4 @@
-package com.example.veritrustmobile.pantallas
+package com.example.veritrustmobile.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

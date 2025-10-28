@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.veritrustmobile.componentes.NavBar
-import com.example.veritrustmobile.rutas.NavGraph
-import com.example.veritrustmobile.rutas.Rutas
+import com.example.veritrustmobile.navigation.NavGraph
+import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 import kotlinx.coroutines.launch
 

@@ -1,4 +1,4 @@
-package com.example.veritrustmobile.rutas
+package com.example.veritrustmobile.navigation
 
 sealed class Rutas(val ruta: String) {
     object Inicio : Rutas("Inicio")
