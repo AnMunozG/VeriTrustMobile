@@ -1,6 +1,5 @@
 package com.example.veritrustmobile.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,15 +11,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = PrimaryBlue,
+    secondary = LightBlueBackground,
+    background = DarkBlue,
+    surface = DarkBlue,
+    error = ErrorRedDark,
+    onPrimary = PureWhite,
+    onSecondary = TextGrey,
+    onBackground = PureWhite,
+    onSurface = PureWhite,
+    onError = PureWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = PrimaryBlue,
+    secondary = DarkBlue,
+    background = OffWhiteBackground,
+    surface = OffWhiteBackground,
+    error = ErrorRed,
+    onPrimary = PureWhite,
+    onSecondary = PureWhite,
+    onBackground = TextGrey,
+    onSurface = TextGrey,
+    onError = PureWhite
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
