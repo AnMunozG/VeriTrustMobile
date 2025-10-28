@@ -1,4 +1,4 @@
-package com.example.veritrustmobile.pantallas
+package com.example.veritrustmobile.ui.screens
 
 
 import androidx.compose.foundation.background
@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.veritrustmobile.rutas.Rutas
-import com.example.veritrustmobile.data.accounts
+import com.example.veritrustmobile.navigation.Rutas
+import com.example.veritrustmobile.model.accounts
 
 
 @OptIn(ExperimentalMaterial3Api::class)

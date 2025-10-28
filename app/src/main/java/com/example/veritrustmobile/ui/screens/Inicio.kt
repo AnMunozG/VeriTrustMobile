@@ -1,4 +1,4 @@
-package com.example.veritrustmobile.pantallas
+package com.example.veritrustmobile.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.veritrustmobile.rutas.Rutas
+import com.example.veritrustmobile.navigation.Rutas
 
 @Composable
 fun Inicio(navController: NavHostController) {
