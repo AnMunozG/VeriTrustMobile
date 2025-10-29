@@ -27,13 +27,11 @@ fun RegistroScreen(
     navController: NavHostController,
     viewModel: RegistroViewModel = viewModel()
 ) {
-    // Escucha eventos de navegación de un solo uso desde el ViewModel
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is RegistroViewModel.NavigationEvent.NavigateToLogin -> {
                     navController.navigate(Rutas.Acceder.ruta) {
-                        // Limpia el backstack para que el usuario no pueda volver al registro
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
@@ -44,7 +42,6 @@ fun RegistroScreen(
         }
     }
 
-    // El contenido de la UI
     RegistroContent(viewModel = viewModel)
 }
 
@@ -53,8 +50,8 @@ fun RegistroContent(viewModel: RegistroViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()), // Permite desplazar si el contenido no cabe
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
