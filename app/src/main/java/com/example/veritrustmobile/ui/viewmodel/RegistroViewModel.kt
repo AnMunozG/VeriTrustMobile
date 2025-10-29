@@ -103,7 +103,7 @@ class RegistroViewModel : ViewModel() {
     fun onRegistroSubmit() {
         if (validarFormulario()) {
             viewModelScope.launch {
-                _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+                _navigationEvent.emit(NavigationEvent.NavigateToValidarCarnet)
             }
         }
     }
@@ -163,5 +163,6 @@ class RegistroViewModel : ViewModel() {
 
     sealed class NavigationEvent {
         object NavigateToLogin : NavigationEvent()
+        object NavigateToValidarCarnet : NavigationEvent()
     }
 }
