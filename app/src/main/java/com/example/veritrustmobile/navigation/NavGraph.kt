@@ -15,30 +15,30 @@ import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 fun NavGraph(navController: NavHostController) {
     val registroViewModel: RegistroViewModel = viewModel()
 
-    // 1. La ruta de inicio ahora es la que tiene el argumento opcional.
     NavHost(
         navController = navController,
         startDestination = Rutas.Inicio.ruta
     ) {
-        // --- Pantalla de Inicio ---
-        // 2. Se define el argumento 'user' como opcional (nullable).
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
                 type = NavType.StringType
-                nullable = true // Permite que el argumento sea nulo
-                defaultValue = null // Valor por defecto si no se pasa
+                nullable = true
+                defaultValue = null
             })
         ) { backStackEntry ->
-            // 3. Se extrae el argumento 'user' y se pasa a la pantalla Inicio.
             val user = backStackEntry.arguments?.getString("user")
             Inicio(navController = navController, user = user)
         }
 
-        // --- Pantalla de Servicios ---
-        // 4. Se define el argumento 'esInvitado' como booleano.
-        composable(Rutas.Servicios.ruta){
-            val esInvitado = it.arguments?.getBoolean("esInvitado") ?: false
+
+        composable(
+            route = "servicios/{esInvitado}",
+            arguments = listOf(navArgument("esInvitado") {
+                type = NavType.BoolType
+            })
+        ) { backStackEntry ->
+            val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
             val serviciosViewModel: ServiciosViewModel = viewModel()
 
             ServiciosScreen(
@@ -49,7 +49,6 @@ fun NavGraph(navController: NavHostController) {
         }
 
 
-        // --- Resto de las pantallas (sin cambios) ---
         composable(Rutas.Nosotros.ruta) {
             Nosotros()
         }

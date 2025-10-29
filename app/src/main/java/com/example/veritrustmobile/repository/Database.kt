@@ -64,7 +64,6 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     private fun addInitialLoginUsers(db: SQLiteDatabase) {
-        // CAMBIO: Las fechas ahora están en formato DD/MM/AAAA
         val initialUsers = listOf(
             mapOf("rut" to "1-9", "nombre" to "Dilan", "fecha" to "01/01/2000", "telefono" to "123", "email" to "dilan@test.com", "password" to "dilan123"),
             mapOf("rut" to "2-7", "nombre" to "Angel", "fecha" to "15/05/1998", "telefono" to "123", "email" to "angel@test.com", "password" to "angel123"),

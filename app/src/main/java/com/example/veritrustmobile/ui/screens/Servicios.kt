@@ -95,7 +95,7 @@ fun ServicioCard(
     modifier: Modifier = Modifier
 ) {
     val formatadorDeMoneda = NumberFormat.getCurrencyInstance(Locale("es", "CL"))
-    formatadorDeMoneda.maximumFractionDigits = 0 // Para no mostrar decimales en el CLP
+    formatadorDeMoneda.maximumFractionDigits = 0
 
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),

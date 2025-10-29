@@ -24,7 +24,6 @@ fun Inicio(navController: NavHostController, user: String?) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Pantalla de bienvenida para invitados (única versión ahora)
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -32,7 +31,7 @@ fun Inicio(navController: NavHostController, user: String?) {
         ) {
             Text(
                 text = "VeriTrust",
-                style = MaterialTheme.typography.displaySmall, // Título más grande
+                style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
@@ -43,7 +42,7 @@ fun Inicio(navController: NavHostController, user: String?) {
             Text(
                 text = "más segura y confiable que nunca",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant // Color más sutil
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
@@ -55,14 +54,14 @@ fun Inicio(navController: NavHostController, user: String?) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre botones
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
                 onClick = { navController.navigate(Rutas.Acceder.ruta) },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Iniciar Sesión") }
 
-            OutlinedButton( // Botón secundario con estilo diferente
+            OutlinedButton(
                 onClick = { navController.navigate(Rutas.Registro.ruta) },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Registrarse") }
@@ -82,7 +81,6 @@ fun Inicio(navController: NavHostController, user: String?) {
 fun InicioPreview() {
     VeriTrustMobileTheme {
         Surface {
-            // El parámetro 'user' ya no tiene efecto, pero lo mantenemos por si la firma de la función se usa en otro lado.
             Inicio(navController = rememberNavController(), user = null)
         }
     }

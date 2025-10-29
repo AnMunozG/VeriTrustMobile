@@ -30,7 +30,6 @@ fun RegistroScreen(
     navController: NavHostController,
     viewModel: RegistroViewModel = viewModel()
 ) {
-    // Escucha los eventos de navegación del ViewModel para actuar sobre ellos.
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -46,7 +45,6 @@ fun RegistroScreen(
         }
     }
 
-    // El contenido de la UI se separa para mayor claridad.
     RegistroContent(viewModel = viewModel)
 }
 
@@ -68,7 +66,6 @@ fun RegistroContent(viewModel: RegistroViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- INICIO DE LA LISTA COMPLETA DE CAMPOS ---
 
         CampoDeTextoFormulario(
             valor = viewModel.rut,
@@ -127,9 +124,7 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             tipoDeTeclado = KeyboardType.Password
         )
 
-        // --- FIN DE LA LISTA COMPLETA DE CAMPOS ---
 
-        // Checkbox para Términos y Condiciones
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,9 +154,7 @@ fun RegistroContent(viewModel: RegistroViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón para enviar el formulario
         Button(
-            // CAMBIO CLAVE: El botón ahora solo llama a la función del ViewModel.
             onClick = viewModel::onRegistroSubmit,
             modifier = Modifier
                 .fillMaxWidth()
