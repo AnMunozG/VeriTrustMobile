@@ -11,4 +11,5 @@ sealed class Rutas(val ruta: String) {
     object Acceder : Rutas("Acceder")
     object Registro : Rutas("Registro")
     object Comprar : Rutas("Comprar")
+    object RecuperarContrasena : Rutas("RecuperarContrasena")
 }

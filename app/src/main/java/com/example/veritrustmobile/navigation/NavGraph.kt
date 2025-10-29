@@ -10,6 +10,7 @@ import com.example.veritrustmobile.ui.screens.Acceder
 import com.example.veritrustmobile.ui.screens.Inicio
 import com.example.veritrustmobile.ui.screens.Nosotros
 import com.example.veritrustmobile.ui.screens.PantallaCompra
+import com.example.veritrustmobile.ui.screens.RecuperarContrasenaScreen
 import com.example.veritrustmobile.ui.screens.RegistroScreen
 import com.example.veritrustmobile.ui.screens.ServiciosScreen
 
@@ -43,5 +44,6 @@ fun NavGraph(navController: NavHostController) {
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
         composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController) }
         composable(Rutas.Comprar.ruta) { PantallaCompra() }
+        composable(Rutas.RecuperarContrasena.ruta) { RecuperarContrasenaScreen(navController = navController) }
     }
 }
