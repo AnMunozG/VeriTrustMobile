@@ -18,7 +18,7 @@ fun NavBar(
             .padding(top = 64.dp, start = 16.dp)
     ) {
         TextButton(onClick = {
-            navController.navigate(Rutas.Servicios.ruta)
+            navController.navigate(Rutas.Servicios.crearRuta(false))
             closeDrawer()
         }) {
             Text("Servicios")
