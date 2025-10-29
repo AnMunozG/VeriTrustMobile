@@ -33,7 +33,7 @@ fun Inicio(navController: NavHostController, user: String?) {
             // Splash screen for logged-in user with welcome message
             LaunchedEffect(Unit) {
                 delay(5000) // Wait for 5 seconds
-                navController.navigate(Rutas.Servicios.ruta) {
+                navController.navigate(Rutas.Servicios.crearRuta(esInvitado = false)) {
                     // Remove the splash screen from the back stack
                     popUpTo("Inicio/{user}") { inclusive = true }
                 }
@@ -112,7 +112,7 @@ fun Inicio(navController: NavHostController, user: String?) {
                     Text(text = "Registrarse")
                 }
 
-                TextButton(onClick = { navController.navigate(Rutas.Servicios.ruta) }) {
+                TextButton(onClick = { navController.navigate(Rutas.Servicios.crearRuta(esInvitado = true)) }) {
                     Text(text = "Continuar como invitado")
                 }
             }

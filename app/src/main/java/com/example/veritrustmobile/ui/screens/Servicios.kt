@@ -33,7 +33,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun ServiciosScreen(navController: NavHostController) {
+fun ServiciosScreen(navController: NavHostController, esInvitado: Boolean) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -52,7 +52,8 @@ fun ServiciosScreen(navController: NavHostController) {
                 onComprarClick = {
                     navController.navigate(Rutas.Comprar.ruta)
                     println("Navegando a la compra de: ${servicio.nombre}")
-                }
+                },
+                esInvitado = esInvitado
             )
         }
     }
@@ -62,9 +63,10 @@ fun ServiciosScreen(navController: NavHostController) {
 fun ServicioCard(
     servicio: Servicio,
     onComprarClick: () -> Unit,
+    esInvitado: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val formatadorDeMoneda = NumberFormat.getNumberInstance(Locale("es", "CL"))
+    val formatadorDeMoneda = NumberFormat.getNumberInstance(Locale.forLanguageTag("es-CL"))
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -115,7 +117,8 @@ fun ServicioCard(
 
             Button(
                 onClick = onComprarClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !esInvitado
             ) {
                 Text("Comprar")
             }
@@ -128,7 +131,7 @@ fun ServicioCard(
 fun ServiciosScreenPreview() {
     val navController = rememberNavController()
     com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme(dynamicColor = false) {
-        ServiciosScreen(navController)
+        ServiciosScreen(navController, esInvitado = true)
     }
 }
 
@@ -138,7 +141,8 @@ fun ServicioCardPreview() {
     com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme(dynamicColor = false) {
         ServicioCard(
             servicio = listaDeServicios.first(),
-            onComprarClick = {}
+            onComprarClick = {},
+            esInvitado = true
         )
     }
 }

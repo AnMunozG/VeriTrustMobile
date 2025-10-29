@@ -23,14 +23,23 @@ fun NavGraph(navController: NavHostController) {
             Inicio(navController = navController, user = null)
         }
         composable(
-            "Inicio/{user}", 
+            Rutas.Inicio.ruta, 
             arguments = listOf(navArgument("user") { type = NavType.StringType })
         ) { backStackEntry ->
             val user = backStackEntry.arguments?.getString("user")
             Inicio(navController = navController, user = user)
         }
         composable(Rutas.Nosotros.ruta) { Nosotros() }
-        composable(Rutas.Servicios.ruta) { ServiciosScreen(navController = navController) }
+        composable(
+            Rutas.Servicios.ruta,
+            arguments = listOf(navArgument("esInvitado") { 
+                type = NavType.BoolType
+                defaultValue = true
+            })
+        ) { backStackEntry ->
+            val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
+            ServiciosScreen(navController = navController, esInvitado = esInvitado)
+        }
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
         composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController) }
         composable(Rutas.Comprar.ruta) { PantallaCompra() }

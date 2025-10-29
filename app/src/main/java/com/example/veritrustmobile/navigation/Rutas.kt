@@ -5,7 +5,9 @@ sealed class Rutas(val ruta: String) {
         fun crearRuta(user: String) = "Inicio/$user"
     }
     object Nosotros : Rutas("Nosotros")
-    object Servicios : Rutas("Servicios")
+    object Servicios : Rutas("Servicios?esInvitado={esInvitado}") {
+        fun crearRuta(esInvitado: Boolean) = "Servicios?esInvitado=$esInvitado"
+    }
     object Acceder : Rutas("Acceder")
     object Registro : Rutas("Registro")
     object Comprar : Rutas("Comprar")
