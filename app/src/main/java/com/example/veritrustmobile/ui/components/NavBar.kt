@@ -15,8 +15,7 @@ fun NavBar(
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(top = 64.dp, start = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(top = 64.dp, start = 16.dp)
     ) {
         TextButton(onClick = {
             navController.navigate(Rutas.Servicios.ruta)
@@ -25,6 +24,8 @@ fun NavBar(
             Text("Servicios")
         }
 
+        Spacer(modifier = Modifier.height(20.dp)) // Espacio entre botones
+
         TextButton(onClick = {
             navController.navigate(Rutas.Nosotros.ruta)
             closeDrawer()
@@ -32,11 +33,21 @@ fun NavBar(
             Text("Nosotros")
         }
 
+
+        Spacer(Modifier.weight(1f))
+
         TextButton(onClick = {
-            navController.navigate(Rutas.Acceder.ruta)
+
+            navController.navigate(Rutas.Acceder.ruta) {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
             closeDrawer()
         }) {
-            Text("Acceder")
+            Text("Cerrar Sesión")
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

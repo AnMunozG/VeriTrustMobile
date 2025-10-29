@@ -98,9 +98,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // --- LÓGICA DE VALIDACIÓN ---
-    // CAMBIO: La función ahora es 'internal' para que la UI no pueda llamarla
-    // directamente, pero sí lo puede hacer onRegistroSubmit.
     internal fun validarFormulario(): Boolean {
         errorRut = if (validarRutChileno(rut)) null else "RUT inválido"
         errorNombre = if (nombre.length >= 3) null else "Ingresa un nombre válido"

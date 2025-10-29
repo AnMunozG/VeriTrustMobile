@@ -34,7 +34,6 @@ class AuthRepository(context: Context) {
      * Busca un usuario por su correo y contraseña.
      */
     fun findUserByCredentials(email: String, password: String): User? {
-        // ... (esta función no cambia y ya es correcta)
         val db = dbHelper.readableDatabase
         val selection = "${Database.UsersTable.COLUMN_NAME_EMAIL} = ? AND ${Database.UsersTable.COLUMN_NAME_PASSWORD_HASH} = ?"
         val selectionArgs = arrayOf(email, password)

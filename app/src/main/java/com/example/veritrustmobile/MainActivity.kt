@@ -41,18 +41,16 @@ fun MainScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Rutas que no mostrarán la barra de navegación principal
     val noNavRoutes = listOf(
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
-        Rutas.RecuperarContrasena.ruta
+        Rutas.RecuperarContrasena.ruta,
+        Rutas.Inicio.ruta
     )
 
-    // La barra de navegación se muestra si la ruta actual no empieza con "Inicio" y no está en la lista de noNavRoutes
     val showNav = currentRoute?.startsWith("Inicio") == false && currentRoute !in noNavRoutes
 
     if (showNav) {
-        // Muestra la navegación para el resto de las pantallas
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
@@ -82,7 +80,6 @@ fun MainScreen() {
             }
         }
     } else {
-        // Muestra solo el contenido de la pantalla, sin Scaffold ni TopAppBar
         NavGraph(navController = navController)
     }
 }
