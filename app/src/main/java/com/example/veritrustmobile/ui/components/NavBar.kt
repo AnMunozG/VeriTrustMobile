@@ -1,5 +1,4 @@
-package com.example.veritrustmobile.componentes
-
+package com.example.veritrustmobile.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,23 +19,24 @@ fun NavBar(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         TextButton(onClick = {
-            navController.navigate(Rutas.Nosotros.ruta)
-            closeDrawer()
-        }) {
-            Text("Nosotros")
-        }
-        TextButton(onClick = {
             navController.navigate(Rutas.Servicios.ruta)
             closeDrawer()
         }) {
             Text("Servicios")
         }
+
+        TextButton(onClick = {
+            navController.navigate(Rutas.Nosotros.ruta)
+            closeDrawer()
+        }) {
+            Text("Nosotros")
+        }
+
         TextButton(onClick = {
             navController.navigate(Rutas.Acceder.ruta)
             closeDrawer()
         }) {
             Text("Acceder")
         }
-
     }
 }

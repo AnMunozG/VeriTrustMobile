@@ -1,20 +1,34 @@
 package com.example.veritrustmobile.ui.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.veritrustmobile.repository.AuthRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeParseException
 
+/**
+ * ViewModel para la pantalla de registro. Gestiona el estado del formulario,
+ * la lógica de validación y la comunicación con el Repositorio para registrar al usuario.
+ *
+ * Hereda de AndroidViewModel para poder acceder al contexto de la aplicación,
+ * necesario para inicializar el AuthRepository.
+ */
+class RegistroViewModel(application: Application) : AndroidViewModel(application) {
 
-class RegistroViewModel : ViewModel() {
+    // 1. Instancia del Repositorio. El ViewModel se comunica con él para las operaciones de datos.
+    private val authRepository = AuthRepository(application.applicationContext)
 
+    // --- Estado de los campos del formulario ---
     var rut by mutableStateOf("")
         private set
     var nombre by mutableStateOf("")
@@ -34,6 +48,7 @@ class RegistroViewModel : ViewModel() {
     var terminosAceptados by mutableStateOf(false)
         private set
 
+    // --- Estado de la UI ---
     var errorRut by mutableStateOf<String?>(null)
         private set
     var errorNombre by mutableStateOf<String?>(null)
@@ -53,61 +68,62 @@ class RegistroViewModel : ViewModel() {
     var errorTerminos by mutableStateOf<String?>(null)
         private set
 
+    // Estado para mostrar un indicador de carga en la UI (ej. un círculo de progreso)
+    var estaCargando by mutableStateOf(false)
+        private set
+
+    // --- Eventos de Navegación (para acciones de un solo uso) ---
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    fun onRutChange(value: String) {
-        rut = value
-        errorRut = null
-    }
+    // --- Funciones para manejar los eventos de la UI ---
+    fun onRutChange(value: String) { rut = value; errorRut = null }
+    fun onNombreChange(value: String) { nombre = value; errorNombre = null }
+    fun onFechaNacimientoChange(value: String) { fechaNacimiento = value; errorFechaNacimiento = null }
+    fun onTelefonoChange(value: String) { telefono = value; errorTelefono = null }
+    fun onEmailChange(value: String) { email = value; errorEmail = null }
+    fun onConfirmarEmailChange(value: String) { confirmarEmail = value; errorConfirmarEmail = null }
+    fun onContrasenaChange(value: String) { contrasena = value; errorContrasena = null }
+    fun onConfirmarContrasenaChange(value: String) { confirmarContrasena = value; errorConfirmarContrasena = null }
+    fun onTerminosChange(value: Boolean) { terminosAceptados = value; errorTerminos = null }
 
-    fun onNombreChange(value: String) {
-        nombre = value
-        errorNombre = null
-    }
-    fun onFechaNacimientoChange(value: String) {
-        fechaNacimiento = value
-        errorFechaNacimiento = null
-    }
-
-    fun onTelefonoChange(value: String) {
-        telefono = value
-        errorTelefono = null
-    }
-
-    fun onEmailChange(value: String) {
-        email = value
-        errorEmail = null
-    }
-
-    fun onConfirmarEmailChange(value: String) {
-        confirmarEmail = value
-        errorConfirmarEmail = null
-    }
-
-    fun onContrasenaChange(value: String) {
-        contrasena = value
-        errorContrasena = null
-    }
-
-    fun onConfirmarContrasenaChange(value: String) {
-        confirmarContrasena = value
-        errorConfirmarContrasena = null
-    }
-
-    fun onTerminosChange(value: Boolean) {
-        terminosAceptados = value
-        errorTerminos = null
-    }
-
+    /**
+     * Inicia el proceso de registro cuando el usuario presiona el botón.
+     */
     fun onRegistroSubmit() {
         if (validarFormulario()) {
+            // Si el formulario es válido, se lanza una corrutina para interactuar con el repositorio.
             viewModelScope.launch {
-                _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+                estaCargando = true // Muestra el indicador de carga
+                try {
+                    // La operación de base de datos se ejecuta en un hilo de fondo (Dispatchers.IO)
+                    val registroExitoso = withContext(Dispatchers.IO) {
+                        authRepository.registrarUsuario(this@RegistroViewModel)
+                    }
+
+                    if (registroExitoso) {
+                        // Si el repositorio confirma que el registro fue exitoso, emite el evento de navegación.
+                        _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+                    } else {
+                        // Si el repositorio devuelve false (ej. RUT o email ya existen), muestra un error.
+                        // Podrías tener un campo de error más genérico para esto.
+                        errorEmail = "El RUT o el correo ya están registrados."
+                    }
+                } catch (e: Exception) {
+                    // Manejo de excepciones inesperadas durante la operación de BD.
+                    // Aquí podrías mostrar un error genérico en un Snackbar o similar.
+                    e.printStackTrace()
+                } finally {
+                    estaCargando = false // Oculta el indicador de carga, sin importar el resultado.
+                }
             }
         }
     }
+
+    // --- Lógica de Validación (Privada) ---
+
     private fun validarFormulario(): Boolean {
+        // Ejecuta todas las validaciones y actualiza los estados de error.
         errorRut = if (validarRutChileno(rut)) null else "RUT inválido"
         errorNombre = if (nombre.length >= 3) null else "Ingresa un nombre válido"
         errorFechaNacimiento = when {
@@ -132,7 +148,7 @@ class RegistroViewModel : ViewModel() {
             val hoy = LocalDate.now()
             Period.between(fechaNac, hoy).years >= 18
         } catch (e: DateTimeParseException) {
-            false
+            false // Formato de fecha inválido.
         }
     }
 
@@ -161,6 +177,7 @@ class RegistroViewModel : ViewModel() {
         return dv == dvEsperado
     }
 
+    // Clase sellada para representar los posibles eventos de navegación.
     sealed class NavigationEvent {
         object NavigateToLogin : NavigationEvent()
     }
