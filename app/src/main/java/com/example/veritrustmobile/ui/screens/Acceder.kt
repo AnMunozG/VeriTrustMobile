@@ -220,7 +220,7 @@ fun Acceder(navController: NavController) {
                     val user = accounts.find {it.user == email && it.password == password}
 
                     if (user != null){
-                        navController.navigate(Rutas.Inicio.ruta+"/${user.user}")
+                        navController.navigate(Rutas.Inicio.crearRuta(user.user))
                     }else {
                         loginError = "El usuario o contraseña no coinciden"
                     }
