@@ -38,7 +38,7 @@ fun NavBar(
 
         TextButton(onClick = {
 
-            navController.navigate(Rutas.Acceder.ruta) {
+            navController.navigate(Rutas.Inicio.ruta) {
                 popUpTo(navController.graph.startDestinationId) {
                     inclusive = true
                 }
