@@ -1,7 +1,11 @@
 package com.example.veritrustmobile.ui.screens
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,33 +26,41 @@ fun PantallaCompra(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Compra tu servicio VeriTrust") })
-        }
+            TopAppBar(
+                title = { Text("Compra tu servicio") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("Detalles de tu compra", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = viewModel.cardName,
-                onValueChange = { viewModel.onCardNameChange(it) },
+                onValueChange = viewModel::onCardNameChange,
                 label = { Text("Nombre en la tarjeta") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
-            TextField(
+            OutlinedTextField(
                 value = viewModel.cardNumber,
-                onValueChange = { viewModel.onCardNumberChange(it) },
+                onValueChange = viewModel::onCardNumberChange,
                 label = { Text("Número de tarjeta") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -57,17 +69,17 @@ fun PantallaCompra(
             )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(
+                OutlinedTextField(
                     value = viewModel.expirationMonth,
-                    onValueChange = { viewModel.onExpirationMonthChange(it) },
+                    onValueChange = viewModel::onExpirationMonthChange,
                     label = { Text("Mes (MM)") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     singleLine = true
                 )
-                TextField(
+                OutlinedTextField(
                     value = viewModel.expirationYear,
-                    onValueChange = { viewModel.onExpirationYearChange(it) },
+                    onValueChange = viewModel::onExpirationYearChange,
                     label = { Text("Año (AAAA)") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -75,9 +87,9 @@ fun PantallaCompra(
                 )
             }
 
-            TextField(
+            OutlinedTextField(
                 value = viewModel.cvv,
-                onValueChange = { viewModel.onCvvChange(it) },
+                onValueChange = viewModel::onCvvChange,
                 label = { Text("CVV") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
@@ -99,7 +111,8 @@ fun PantallaCompra(
                 onClick = { viewModel.processPayment() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(25.dp)
             ) {
                 Text("Pagar")
             }
@@ -107,10 +120,13 @@ fun PantallaCompra(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light Mode", showBackground = true)
+@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun PreviewPantallaCompra() {
-    VeriTrustMobileTheme(dynamicColor = false) {
-        PantallaCompra()
+    VeriTrustMobileTheme {
+        Surface {
+            PantallaCompra()
+        }
     }
 }

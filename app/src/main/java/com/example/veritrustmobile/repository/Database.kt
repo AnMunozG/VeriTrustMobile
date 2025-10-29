@@ -12,16 +12,14 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         private const val DATABASE_VERSION = 1
     }
 
-    // --- ESQUEMA DE LA TABLA DE USUARIOS (ACTUALIZADO) ---
     object UsersTable : BaseColumns {
         const val TABLE_NAME = "users"
-        // Columnas añadidas para coincidir con el formulario de registro
         const val COLUMN_NAME_RUT = "rut"
         const val COLUMN_NAME_NOMBRE_COMPLETO = "nombre_completo"
         const val COLUMN_NAME_FECHA_NACIMIENTO = "fecha_nacimiento"
         const val COLUMN_NAME_TELEFONO = "telefono"
         const val COLUMN_NAME_EMAIL = "email"
-        const val COLUMN_NAME_PASSWORD_HASH = "password_hash" // El nombre ya era correcto
+        const val COLUMN_NAME_PASSWORD_HASH = "password_hash"
 
         const val SQL_CREATE_TABLE = """
             CREATE TABLE $TABLE_NAME (
@@ -35,7 +33,6 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             )"""
     }
 
-    // --- ESQUEMA DE LA TABLA DE SERVICIOS (SIN CAMBIOS) ---
     object ServicesTable : BaseColumns {
         const val TABLE_NAME = "services"
         const val COLUMN_NAME_NOMBRE = "nombre"
@@ -56,8 +53,6 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(UsersTable.SQL_CREATE_TABLE)
         db.execSQL(ServicesTable.SQL_CREATE_TABLE)
-
-        // Los datos iniciales siguen siendo útiles para pruebas de login
         addInitialLoginUsers(db)
         addInitialServices(db)
     }
@@ -69,10 +64,11 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     }
 
     private fun addInitialLoginUsers(db: SQLiteDatabase) {
+        // CAMBIO: Las fechas ahora están en formato DD/MM/AAAA
         val initialUsers = listOf(
-            mapOf("rut" to "1-9", "nombre" to "Dilan", "fecha" to "2000-01-01", "telefono" to "123", "email" to "dilan@test.com", "password" to "dilan123"),
-            mapOf("rut" to "2-7", "nombre" to "Angel", "fecha" to "2000-01-01", "telefono" to "123", "email" to "angel@test.com", "password" to "angel123"),
-            mapOf("rut" to "3-5", "nombre" to "Admin", "fecha" to "2000-01-01", "telefono" to "123", "email" to "admin@test.com", "password" to "admin")
+            mapOf("rut" to "1-9", "nombre" to "Dilan", "fecha" to "01/01/2000", "telefono" to "123", "email" to "dilan@test.com", "password" to "dilan123"),
+            mapOf("rut" to "2-7", "nombre" to "Angel", "fecha" to "15/05/1998", "telefono" to "123", "email" to "angel@test.com", "password" to "angel123"),
+            mapOf("rut" to "3-5", "nombre" to "Admin", "fecha" to "20/02/1995", "telefono" to "123", "email" to "admin@test.com", "password" to "admin")
         )
 
         db.beginTransaction()
@@ -94,6 +90,7 @@ class Database(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         }
     }
 
+    // La función addInitialServices no cambia.
     private fun addInitialServices(db: SQLiteDatabase) {
         val initialServices = listOf(
             mapOf(
