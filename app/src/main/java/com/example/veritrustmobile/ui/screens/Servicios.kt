@@ -188,7 +188,6 @@ fun ShimmerLoadingCard() {
     }
 }
 
-// Previews no necesitan cambios, pero se mantienen para el desarrollo.
 private val previewServices = listOf(
     Servicio("Firma Electrónica Simple", "Certificado Digital", 15390, listOf("Válida para trámites tributarios", "Firma desde cualquier dispositivo")),
     Servicio("Firma Electrónica Avanzada", "e-token", 21990, listOf("Constitución de empresas", "Mayor nivel de seguridad"))
