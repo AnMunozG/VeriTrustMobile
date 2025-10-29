@@ -38,7 +38,8 @@ fun NavGraph(navController: NavHostController) {
         // 4. Se define el argumento 'esInvitado' como booleano.
         composable(
             route = Rutas.Servicios.ruta,
-            arguments = listOf(navArgument("esInvitado") {
+            arguments = listOf(
+                navArgument("esInvitado") {
                 type = NavType.BoolType
                 defaultValue = true // Por defecto, es invitado
             })

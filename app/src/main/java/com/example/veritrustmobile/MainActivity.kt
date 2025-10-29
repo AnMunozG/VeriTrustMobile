@@ -45,7 +45,8 @@ fun MainScreen() {
     val noNavRoutes = listOf(
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
-        Rutas.RecuperarContrasena.ruta
+        Rutas.RecuperarContrasena.ruta,
+        Rutas.Inicio.ruta
     )
 
     // La barra de navegación se muestra si la ruta actual no empieza con "Inicio" y no está en la lista de noNavRoutes

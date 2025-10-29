@@ -28,11 +28,9 @@ import java.util.Locale
 fun ServiciosScreen(
     navController: NavHostController,
     esInvitado: Boolean,
-    // 1. Inyecta el ViewModel. La UI ya no gestiona sus propios datos.
     viewModel: ServiciosViewModel = viewModel()
 ) {
-    // 2. Observa el estado (la lista de servicios) del ViewModel.
-    //    La UI se reconstruirá automáticamente cuando los datos se carguen.
+
     val services by viewModel.servicesState.collectAsState()
 
     LazyColumn(
@@ -74,7 +72,6 @@ fun ServiciosScreen(
     }
 }
 
-// La función ServicioCard no necesita cambios, ya que es "sin estado".
 @Composable
 fun ServicioCard(
     servicio: Servicio,
