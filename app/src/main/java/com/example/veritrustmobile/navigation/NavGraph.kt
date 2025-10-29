@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.veritrustmobile.ui.screens.*
 import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
+import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -36,18 +37,17 @@ fun NavGraph(navController: NavHostController) {
 
         // --- Pantalla de Servicios ---
         // 4. Se define el argumento 'esInvitado' como booleano.
-        composable(
-            route = Rutas.Servicios.ruta,
-            arguments = listOf(
-                navArgument("esInvitado") {
-                type = NavType.BoolType
-                defaultValue = true // Por defecto, es invitado
-            })
-        ) { backStackEntry ->
-            // 5. Se extrae el argumento y se pasa a la pantalla Servicios.
-            val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
-            ServiciosScreen(navController = navController, esInvitado = esInvitado)
+        composable(Rutas.Servicios.ruta){
+            val esInvitado = it.arguments?.getBoolean("esInvitado") ?: false
+            val serviciosViewModel: ServiciosViewModel = viewModel()
+
+            ServiciosScreen(
+                navController = navController,
+                esInvitado = esInvitado,
+                viewModel = serviciosViewModel
+            )
         }
+
 
         // --- Resto de las pantallas (sin cambios) ---
         composable(Rutas.Nosotros.ruta) {
