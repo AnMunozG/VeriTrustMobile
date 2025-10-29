@@ -35,6 +35,9 @@ fun RegistroScreen(
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
+                is RegistroViewModel.NavigationEvent.NavigateToValidarCarnet -> {
+                    navController.navigate(Rutas.ValidarCarnet.ruta)
+                }
             }
         }
     }

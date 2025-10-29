@@ -94,28 +94,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
         if (validarFormulario()) {
             // Si el formulario es válido, se lanza una corrutina para interactuar con el repositorio.
             viewModelScope.launch {
-                estaCargando = true // Muestra el indicador de carga
-                try {
-                    // La operación de base de datos se ejecuta en un hilo de fondo (Dispatchers.IO)
-                    val registroExitoso = withContext(Dispatchers.IO) {
-                        authRepository.registrarUsuario(this@RegistroViewModel)
-                    }
-
-                    if (registroExitoso) {
-                        // Si el repositorio confirma que el registro fue exitoso, emite el evento de navegación.
-                        _navigationEvent.emit(NavigationEvent.NavigateToLogin)
-                    } else {
-                        // Si el repositorio devuelve false (ej. RUT o email ya existen), muestra un error.
-                        // Podrías tener un campo de error más genérico para esto.
-                        errorEmail = "El RUT o el correo ya están registrados."
-                    }
-                } catch (e: Exception) {
-                    // Manejo de excepciones inesperadas durante la operación de BD.
-                    // Aquí podrías mostrar un error genérico en un Snackbar o similar.
-                    e.printStackTrace()
-                } finally {
-                    estaCargando = false // Oculta el indicador de carga, sin importar el resultado.
-                }
+                _navigationEvent.emit(NavigationEvent.NavigateToValidarCarnet)
             }
         }
     }
@@ -180,5 +159,6 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     // Clase sellada para representar los posibles eventos de navegación.
     sealed class NavigationEvent {
         object NavigateToLogin : NavigationEvent()
+        object NavigateToValidarCarnet : NavigationEvent()
     }
 }

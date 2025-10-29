@@ -2,187 +2,255 @@ package com.example.veritrustmobile.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.veritrustmobile.model.accounts
 import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
-import com.example.veritrustmobile.ui.viewmodel.AccederViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Acceder(
-    navController: NavController,
-    // 1. Inyecta el ViewModel. Compose se encargará de su ciclo de vida.
-    viewModel: AccederViewModel = viewModel()
-) {
-    // 2. Escucha los eventos de navegación que vienen del ViewModel.
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is AccederViewModel.NavigationEvent.NavigateToHome -> {
-                    // Navega a la pantalla de servicios cuando el login es exitoso.
-                    navController.navigate(Rutas.Servicios.ruta) {
-                        // Limpia el historial para que el usuario no pueda volver al login.
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    }
-                }
-            }
-        }
-    }
+fun Acceder(navController: NavController) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surface
-                    )
-                )
-            )
-    )
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf("") }
 
+    // Usar el color de fondo del tema
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(120.dp))
+        Spacer(modifier = Modifier.height(150.dp))
 
+        // Usar tipografía y color primario del tema
         Text(
             "Inicio de Sesión",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.ExtraBold
+            style = MaterialTheme.typography.headlineLarge.copy(
+                shadow = Shadow(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f),
+                    offset = Offset(1f, 1f),
+                    blurRadius = 4f
+                )
+            ),
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        // 3. Los campos de texto ahora leen el estado desde el ViewModel
-        // y le notifican los cambios.
+        // =========== CAMPO DE TEXTO DE USUARIO ===========
+
         TextField(
-            value = viewModel.email,
-            onValueChange = { viewModel.onEmailChange(it) },
-            label = { Text("Correo Electrónico") },
+            value = email,
+            onValueChange = {
+                if (it.length <= 25) email = it
+            },
+            label = { Text("Nombre") },
             leadingIcon = {
-                Icon(Icons.Rounded.AccountCircle, contentDescription = null)
+                Icon(
+                    Icons.Rounded.AccountCircle,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             },
             singleLine = true,
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.3f)
             ),
-            isError = viewModel.loginError != null // El error de login general afecta a ambos campos.
+            supportingText = {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    if (emailError.isNotEmpty()) {
+                        Text(
+                            text = emailError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Text(
+                        text = "${email.length} / 25",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(3.dp))
+
+        // =========== CAMPO DE TEXTO DE CONTRASEÑA ===========
 
         TextField(
             value = viewModel.password,
             onValueChange = { viewModel.onPasswordChange(it) },
             label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Rounded.Lock, contentDescription = null) },
+            leadingIcon = {
+                Icon(
+                    Icons.Rounded.Lock,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
             shape = RoundedCornerShape(8.dp),
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.3f)
             ),
-            isError = viewModel.loginError != null
+            supportingText = {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (passwordError.isNotEmpty()) {
+                        Text(
+                            text = passwordError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Text(
+                        text = "${password.length} / 65",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+            }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-        // Muestra un indicador de carga si el ViewModel está ocupado.
-        if (viewModel.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.padding(vertical = 16.dp))
-        } else {
-            // 4. El botón ahora solo notifica al ViewModel la intención de iniciar sesión.
-            Button(
-                onClick = { viewModel.onLoginClick() },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text(
-                    text = "Ingresar",
-                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-                )
-            }
+        // =========== BOTON DE LOGIN Y OLVIDASTE CONTRASEÑA ===========
+
+        Button(
+            onClick = {
+                emailError = if (email.isBlank()) "Nombre no puede estar vacio" else ""
+                passwordError = if (password.isBlank()) "Contraseña no puede estar vacia" else ""
+                if (emailError.isEmpty() && passwordError.isEmpty()) {
+                    val user = accounts.find { it.user == email && it.password == password }
+
+                    if (user != null) {
+                        navController.navigate(Rutas.Inicio.crearRuta(user.user))
+                    } else {
+                        loginError = "El usuario o contraseña no coinciden"
+                    }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 60.dp)
+                .height(50.dp),
+            shape = RoundedCornerShape(25.dp),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
+            ),
+            // Usar colores del tema para el botón
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text(
+                text = "Ingresar",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+            )
         }
 
-        // 5. El mensaje de error ahora se lee directamente del ViewModel.
-        viewModel.loginError?.let {
+        if (loginError.isNotEmpty()) {
             Text(
-                text = it,
+                text = loginError,
                 color = MaterialTheme.colorScheme.error,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 16.dp)
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 17.dp)
             )
         }
 
         Spacer(modifier = Modifier.weight(1f)) // Empuja el contenido de abajo hacia el final
 
-        // =========== SECCIÓN INFERIOR ===========
+        // Usar color primario para el texto clickeable para que parezca un enlace
         Text(
             text = "Olvidaste la contraseña?",
             color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable { /* TODO: Lógica de olvidar contraseña */ },
-            fontSize = 16.sp
+            modifier = Modifier.clickable {
+                navController.navigate(Rutas.RecuperarContrasena.ruta)
+            },
+            style = MaterialTheme.typography.bodyMedium
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 32.dp)
-        ) {
-            Text("¿No tienes una cuenta? ", fontSize = 16.sp)
-            Text(
-                text = "Regístrate",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { navController.navigate(Rutas.Registro.ruta) },
-                fontSize = 16.sp
-            )
-        }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewAcceder() {
     VeriTrustMobileTheme {
-        Acceder(navController = rememberNavController())
+        Acceder(
+            navController = rememberNavController()
+        )
     }
 }
