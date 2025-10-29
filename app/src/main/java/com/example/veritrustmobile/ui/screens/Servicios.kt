@@ -1,39 +1,40 @@
 package com.example.veritrustmobile.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.veritrustmobile.model.Servicio
-import com.example.veritrustmobile.model.listaDeServicios
 import com.example.veritrustmobile.navigation.Rutas
+import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
+import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun ServiciosScreen(navController: NavHostController, esInvitado: Boolean) {
+fun ServiciosScreen(
+    navController: NavHostController,
+    esInvitado: Boolean,
+    // 1. Inyecta el ViewModel. La UI ya no gestiona sus propios datos.
+    viewModel: ServiciosViewModel = viewModel()
+) {
+    // 2. Observa el estado (la lista de servicios) del ViewModel.
+    //    La UI se reconstruirá automáticamente cuando los datos se carguen.
+    val services by viewModel.servicesState.collectAsState()
+
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -46,19 +47,34 @@ fun ServiciosScreen(navController: NavHostController, esInvitado: Boolean) {
             )
         }
 
-        items(listaDeServicios) { servicio ->
-            ServicioCard(
-                servicio = servicio,
-                onComprarClick = {
-                    navController.navigate(Rutas.Comprar.ruta)
-                    println("Navegando a la compra de: ${servicio.nombre}")
-                },
-                esInvitado = esInvitado
-            )
+        // 3. Verifica si la lista de servicios está vacía (mientras se carga).
+        if (services.isEmpty()) {
+            item {
+                // Muestra un indicador de carga en el centro.
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        } else {
+            // 4. Cuando los datos llegan, itera sobre la lista del ViewModel.
+            items(services) { servicio ->
+                ServicioCard(
+                    servicio = servicio,
+                    onComprarClick = {
+                        navController.navigate(Rutas.Comprar.ruta)
+                        println("Navegando a la compra de: ${servicio.nombre}")
+                    },
+                    esInvitado = esInvitado
+                )
+            }
         }
     }
 }
 
+// La función ServicioCard no necesita cambios, ya que es "sin estado".
 @Composable
 fun ServicioCard(
     servicio: Servicio,
@@ -66,7 +82,7 @@ fun ServicioCard(
     esInvitado: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val formatadorDeMoneda = NumberFormat.getNumberInstance(Locale.forLanguageTag("es-CL"))
+    val formatadorDeMoneda = NumberFormat.getNumberInstance(Locale("es", "CL"))
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -126,21 +142,27 @@ fun ServicioCard(
     }
 }
 
+// 5. Para las Previews, creamos una lista de datos falsos porque no tienen acceso
+//    a la base de datos ni al ViewModel en tiempo de diseño.
+private val previewServices = listOf(
+    Servicio("Firma Electrónica Simple", "Certificado Digital", 15390, listOf("Detalle 1", "Detalle 2")),
+    Servicio("Firma Electrónica Avanzada", "e-token", 21990, listOf("Detalle A", "Detalle B"))
+)
+
 @Preview(showBackground = true)
 @Composable
 fun ServiciosScreenPreview() {
-    val navController = rememberNavController()
-    com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme(dynamicColor = false) {
-        ServiciosScreen(navController, esInvitado = true)
+    VeriTrustMobileTheme(dynamicColor = false) {
+        ServiciosScreen(rememberNavController(), esInvitado = true)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ServicioCardPreview() {
-    com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme(dynamicColor = false) {
+    VeriTrustMobileTheme(dynamicColor = false) {
         ServicioCard(
-            servicio = listaDeServicios.first(),
+            servicio = previewServices.first(),
             onComprarClick = {},
             esInvitado = true
         )

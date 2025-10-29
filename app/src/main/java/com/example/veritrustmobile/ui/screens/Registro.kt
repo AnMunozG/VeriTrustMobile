@@ -1,8 +1,11 @@
 package com.example.veritrustmobile.ui.screens
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -27,6 +30,7 @@ fun RegistroScreen(
     navController: NavHostController,
     viewModel: RegistroViewModel = viewModel()
 ) {
+    // Escucha los eventos de navegación del ViewModel para actuar sobre ellos.
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -42,6 +46,7 @@ fun RegistroScreen(
         }
     }
 
+    // El contenido de la UI se separa para mayor claridad.
     RegistroContent(viewModel = viewModel)
 }
 
@@ -50,8 +55,9 @@ fun RegistroContent(viewModel: RegistroViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState()), // Permite el scroll en pantallas pequeñas.
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -62,29 +68,27 @@ fun RegistroContent(viewModel: RegistroViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Campos del Formulario ---
+        // --- INICIO DE LA LISTA COMPLETA DE CAMPOS ---
+
         CampoDeTextoFormulario(
             valor = viewModel.rut,
             onValueChange = viewModel::onRutChange,
             etiqueta = "RUT/RUN (Ej: 12345678-9)",
             error = viewModel.errorRut
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.nombre,
             onValueChange = viewModel::onNombreChange,
             etiqueta = "Nombre completo",
             error = viewModel.errorNombre
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.fechaNacimiento,
             onValueChange = viewModel::onFechaNacimientoChange,
-            etiqueta = "Fecha de Nacimiento (AAAA-MM-DD)",
+            etiqueta = "Fecha de Nacimiento (DD/MM/AAAA)",
             error = viewModel.errorFechaNacimiento,
             tipoDeTeclado = KeyboardType.Number
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.telefono,
             onValueChange = viewModel::onTelefonoChange,
@@ -92,7 +96,6 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             error = viewModel.errorTelefono,
             tipoDeTeclado = KeyboardType.Phone
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.email,
             onValueChange = viewModel::onEmailChange,
@@ -100,7 +103,6 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             error = viewModel.errorEmail,
             tipoDeTeclado = KeyboardType.Email
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.confirmarEmail,
             onValueChange = viewModel::onConfirmarEmailChange,
@@ -108,7 +110,6 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             error = viewModel.errorConfirmarEmail,
             tipoDeTeclado = KeyboardType.Email
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.contrasena,
             onValueChange = viewModel::onContrasenaChange,
@@ -117,7 +118,6 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             esContrasena = true,
             tipoDeTeclado = KeyboardType.Password
         )
-
         CampoDeTextoFormulario(
             valor = viewModel.confirmarContrasena,
             onValueChange = viewModel::onConfirmarContrasenaChange,
@@ -127,7 +127,9 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             tipoDeTeclado = KeyboardType.Password
         )
 
-        // --- Términos y Condiciones ---
+        // --- FIN DE LA LISTA COMPLETA DE CAMPOS ---
+
+        // Checkbox para Términos y Condiciones
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,23 +159,23 @@ fun RegistroContent(viewModel: RegistroViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- Botón de Registro ---
+        // Botón para enviar el formulario
         Button(
+            // CAMBIO CLAVE: El botón ahora solo llama a la función del ViewModel.
             onClick = viewModel::onRegistroSubmit,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(50.dp),
+            shape = RoundedCornerShape(25.dp) // Botón redondeado
         ) {
-            Text("Crear cuenta")
+            Text("Continuar")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
-/**
- * Composable reutilizable para los campos de texto del formulario, ahora con soporte para errores.
- */
+
 @Composable
 private fun CampoDeTextoFormulario(
     valor: String,
@@ -194,6 +196,7 @@ private fun CampoDeTextoFormulario(
             visualTransformation = if (esContrasena) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = tipoDeTeclado),
             isError = error != null,
+            shape = RoundedCornerShape(12.dp),
             supportingText = {
                 if (error != null) {
                     Text(
@@ -207,10 +210,11 @@ private fun CampoDeTextoFormulario(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light Mode", showBackground = true)
+@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun RegistroScreenPreview() {
-    VeriTrustMobileTheme(dynamicColor = false) {
+    VeriTrustMobileTheme {
         Surface {
             RegistroScreen(rememberNavController())
         }

@@ -1,51 +1,75 @@
 package com.example.veritrustmobile.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.veritrustmobile.ui.screens.Acceder
-import com.example.veritrustmobile.ui.screens.Inicio
-import com.example.veritrustmobile.ui.screens.Nosotros
-import com.example.veritrustmobile.ui.screens.PantallaCompra
-import com.example.veritrustmobile.ui.screens.RecuperarContrasenaScreen
-import com.example.veritrustmobile.ui.screens.RegistroScreen
-import com.example.veritrustmobile.ui.screens.ServiciosScreen
-import com.example.veritrustmobile.ui.screens.ValidarCarnetScreen
+import com.example.veritrustmobile.ui.screens.*
+import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+    val registroViewModel: RegistroViewModel = viewModel()
+
+    // 1. La ruta de inicio ahora es la que tiene el argumento opcional.
     NavHost(
         navController = navController,
-        startDestination = "Inicio"
+        startDestination = Rutas.Inicio.ruta
     ) {
-        composable("Inicio") { 
-            Inicio(navController = navController, user = null)
-        }
+        // --- Pantalla de Inicio ---
+        // 2. Se define el argumento 'user' como opcional (nullable).
         composable(
-            Rutas.Inicio.ruta, 
-            arguments = listOf(navArgument("user") { type = NavType.StringType })
+            route = Rutas.Inicio.ruta,
+            arguments = listOf(navArgument("user") {
+                type = NavType.StringType
+                nullable = true // Permite que el argumento sea nulo
+                defaultValue = null // Valor por defecto si no se pasa
+            })
         ) { backStackEntry ->
+            // 3. Se extrae el argumento 'user' y se pasa a la pantalla Inicio.
             val user = backStackEntry.arguments?.getString("user")
             Inicio(navController = navController, user = user)
         }
-        composable(Rutas.Nosotros.ruta) { Nosotros() }
+
+        // --- Pantalla de Servicios ---
+        // 4. Se define el argumento 'esInvitado' como booleano.
         composable(
-            Rutas.Servicios.ruta,
-            arguments = listOf(navArgument("esInvitado") { 
+            route = Rutas.Servicios.ruta,
+            arguments = listOf(navArgument("esInvitado") {
                 type = NavType.BoolType
-                defaultValue = true
+                defaultValue = true // Por defecto, es invitado
             })
         ) { backStackEntry ->
+            // 5. Se extrae el argumento y se pasa a la pantalla Servicios.
             val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
             ServiciosScreen(navController = navController, esInvitado = esInvitado)
         }
-        composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
-        composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController) }
-        composable(Rutas.Comprar.ruta) { PantallaCompra() }
-        composable(Rutas.RecuperarContrasena.ruta) { RecuperarContrasenaScreen(navController = navController) }
-        composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController) }
+
+        // --- Resto de las pantallas (sin cambios) ---
+        composable(Rutas.Nosotros.ruta) {
+            Nosotros()
+        }
+
+        composable(Rutas.Acceder.ruta) {
+            Acceder(navController = navController)
+        }
+
+        composable(Rutas.Registro.ruta) {
+            RegistroScreen(navController = navController, viewModel = registroViewModel)
+        }
+
+        composable(Rutas.ValidarCarnet.ruta) {
+            ValidarCarnetScreen(navController = navController, viewModel = registroViewModel)
+        }
+
+        composable(Rutas.Comprar.ruta) {
+            PantallaCompra()
+        }
+        composable(Rutas.RecuperarContrasena.ruta){
+            RecuperarContrasenaScreen(navController = navController)
+        }
     }
 }

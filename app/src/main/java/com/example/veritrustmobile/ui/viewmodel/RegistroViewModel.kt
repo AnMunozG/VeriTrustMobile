@@ -14,69 +14,40 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.Period
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-/**
- * ViewModel para la pantalla de registro. Gestiona el estado del formulario,
- * la lógica de validación y la comunicación con el Repositorio para registrar al usuario.
- *
- * Hereda de AndroidViewModel para poder acceder al contexto de la aplicación,
- * necesario para inicializar el AuthRepository.
- */
 class RegistroViewModel(application: Application) : AndroidViewModel(application) {
 
-    // 1. Instancia del Repositorio. El ViewModel se comunica con él para las operaciones de datos.
     private val authRepository = AuthRepository(application.applicationContext)
 
-    // --- Estado de los campos del formulario ---
-    var rut by mutableStateOf("")
-        private set
-    var nombre by mutableStateOf("")
-        private set
-    var fechaNacimiento by mutableStateOf("") // Formato "YYYY-MM-DD"
-        private set
-    var telefono by mutableStateOf("")
-        private set
-    var email by mutableStateOf("")
-        private set
-    var confirmarEmail by mutableStateOf("")
-        private set
-    var contrasena by mutableStateOf("")
-        private set
-    var confirmarContrasena by mutableStateOf("")
-        private set
-    var terminosAceptados by mutableStateOf(false)
-        private set
+    // --- Estados del formulario ---
+    var rut by mutableStateOf(""); private set
+    var nombre by mutableStateOf(""); private set
+    var fechaNacimiento by mutableStateOf(""); private set
+    var telefono by mutableStateOf(""); private set
+    var email by mutableStateOf(""); private set
+    var confirmarEmail by mutableStateOf(""); private set
+    var contrasena by mutableStateOf(""); private set
+    var confirmarContrasena by mutableStateOf(""); private set
+    var terminosAceptados by mutableStateOf(false); private set
+    var estaCargando by mutableStateOf(false); private set
 
-    // --- Estado de la UI ---
-    var errorRut by mutableStateOf<String?>(null)
-        private set
-    var errorNombre by mutableStateOf<String?>(null)
-        private set
-    var errorFechaNacimiento by mutableStateOf<String?>(null)
-        private set
-    var errorTelefono by mutableStateOf<String?>(null)
-        private set
-    var errorEmail by mutableStateOf<String?>(null)
-        private set
-    var errorConfirmarEmail by mutableStateOf<String?>(null)
-        private set
-    var errorContrasena by mutableStateOf<String?>(null)
-        private set
-    var errorConfirmarContrasena by mutableStateOf<String?>(null)
-        private set
-    var errorTerminos by mutableStateOf<String?>(null)
-        private set
+    // --- Estados de error ---
+    var errorRut by mutableStateOf<String?>(null); private set
+    var errorNombre by mutableStateOf<String?>(null); private set
+    var errorFechaNacimiento by mutableStateOf<String?>(null); private set
+    var errorTelefono by mutableStateOf<String?>(null); private set
+    var errorEmail by mutableStateOf<String?>(null); private set
+    var errorConfirmarEmail by mutableStateOf<String?>(null); private set
+    var errorContrasena by mutableStateOf<String?>(null); private set
+    var errorConfirmarContrasena by mutableStateOf<String?>(null); private set
+    var errorTerminos by mutableStateOf<String?>(null); private set
 
-    // Estado para mostrar un indicador de carga en la UI (ej. un círculo de progreso)
-    var estaCargando by mutableStateOf(false)
-        private set
-
-    // --- Eventos de Navegación (para acciones de un solo uso) ---
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    // --- Funciones para manejar los eventos de la UI ---
+    // --- Funciones on...Change (para actualizar el estado desde la UI) ---
     fun onRutChange(value: String) { rut = value; errorRut = null }
     fun onNombreChange(value: String) { nombre = value; errorNombre = null }
     fun onFechaNacimientoChange(value: String) { fechaNacimiento = value; errorFechaNacimiento = null }
@@ -88,26 +59,54 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     fun onTerminosChange(value: Boolean) { terminosAceptados = value; errorTerminos = null }
 
     /**
-     * Inicia el proceso de registro cuando el usuario presiona el botón.
+     * Inicia el proceso de registro. Ahora valida primero y luego emite el evento.
      */
     fun onRegistroSubmit() {
         if (validarFormulario()) {
-            // Si el formulario es válido, se lanza una corrutina para interactuar con el repositorio.
             viewModelScope.launch {
                 _navigationEvent.emit(NavigationEvent.NavigateToValidarCarnet)
             }
         }
     }
 
-    // --- Lógica de Validación (Privada) ---
+    /**
+     * Llama al repositorio para guardar el usuario en la base de datos.
+     */
+    fun finalizarRegistro() {
+        viewModelScope.launch {
+            estaCargando = true
+            try {
+                val registroExitoso = withContext(Dispatchers.IO) {
+                    authRepository.registrarUsuario(
+                        rut = rut,
+                        nombre = nombre,
+                        fechaNacimiento = fechaNacimiento,
+                        telefono = telefono,
+                        email = email,
+                        contrasena = contrasena
+                    )
+                }
+                if (registroExitoso) {
+                    _navigationEvent.emit(NavigationEvent.NavigateToLogin)
+                } else {
+                    errorRut = "El RUT o el correo ya están registrados."
+                    errorEmail = "El RUT o el correo ya están registrados."
+                }
+            } finally {
+                estaCargando = false
+            }
+        }
+    }
 
-    private fun validarFormulario(): Boolean {
-        // Ejecuta todas las validaciones y actualiza los estados de error.
+    // --- LÓGICA DE VALIDACIÓN ---
+    // CAMBIO: La función ahora es 'internal' para que la UI no pueda llamarla
+    // directamente, pero sí lo puede hacer onRegistroSubmit.
+    internal fun validarFormulario(): Boolean {
         errorRut = if (validarRutChileno(rut)) null else "RUT inválido"
         errorNombre = if (nombre.length >= 3) null else "Ingresa un nombre válido"
         errorFechaNacimiento = when {
             fechaNacimiento.isBlank() -> "Ingresa tu fecha de nacimiento"
-            !esMayorDeEdad(fechaNacimiento) -> "Debes ser mayor de 18 años"
+            !esMayorDeEdad(fechaNacimiento) -> "Formato de fecha inválido o eres menor de 18 años"
             else -> null
         }
         errorTelefono = if (telefono.replace(Regex("[\\s+]"), "").matches(Regex("^\\d{7,15}$"))) null else "Número de teléfono inválido"
@@ -122,41 +121,36 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun esMayorDeEdad(fechaNacimientoStr: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         return try {
-            val fechaNac = LocalDate.parse(fechaNacimientoStr) // Espera formato YYYY-MM-DD
+            val fechaNac = LocalDate.parse(fechaNacimientoStr, formatter)
             val hoy = LocalDate.now()
             Period.between(fechaNac, hoy).years >= 18
         } catch (e: DateTimeParseException) {
-            false // Formato de fecha inválido.
+            false
         }
     }
 
     private fun validarRutChileno(rut: String): Boolean {
         val rutLimpio = rut.replace(Regex("[.-]"), "")
         if (rutLimpio.length < 2) return false
-
         val cuerpo = rutLimpio.substring(0, rutLimpio.length - 1)
         val dv = rutLimpio.last().uppercaseChar()
-
         if (!cuerpo.matches(Regex("^\\d+$"))) return false
-
         var suma = 0
         var multiplo = 2
         for (i in cuerpo.length - 1 downTo 0) {
             suma += cuerpo[i].toString().toInt() * multiplo
             multiplo = if (multiplo == 7) 2 else multiplo + 1
         }
-
         val dvEsperado = when (val resto = 11 - (suma % 11)) {
             11 -> '0'
             10 -> 'K'
             else -> resto.toString().first()
         }
-
         return dv == dvEsperado
     }
 
-    // Clase sellada para representar los posibles eventos de navegación.
     sealed class NavigationEvent {
         object NavigateToLogin : NavigationEvent()
         object NavigateToValidarCarnet : NavigationEvent()
