@@ -1,43 +1,35 @@
 package com.example.veritrustmobile.repository
 
 import com.example.veritrustmobile.model.User
-// Asegúrate de importar tu RetrofitClient.
-// Si lo pusiste en 'data', usa este import:
 import com.example.veritrustmobile.data.RetrofitClient
 
 class AuthRepository {
 
-    // NOTA: Ya no necesitamos 'context' en el constructor
-
     /**
      * LOGIN: Envía credenciales a la API
-     * (Reemplaza a la antigua función findUserByCredentials)
      */
     suspend fun login(email: String, pass: String): User? {
         return try {
-            // Creamos el objeto User que espera la API
             val userRequest = User(user = email, password = pass)
 
-            // Llamamos al endpoint definido en ApiService
             val response = RetrofitClient.api.login(userRequest)
 
             if (response.isSuccessful) {
-                // Si es 200 OK, devolvemos el usuario que responde la API
                 response.body()
             } else {
-                // Si es 401 (no autorizado) u otro error
+                // También es útil ver por qué falla el login
+                println("🚨 ERROR LOGIN CÓDIGO: ${response.code()}")
                 null
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            null // Error de conexión
+            null
         }
     }
 
     /**
-     * REGISTRO:
-     * Por ahora simularemos que siempre funciona (return true)
-     * porque necesitamos agregar el endpoint @POST("registro") en ApiService.
+     * REGISTRO: Envía todos los datos del formulario
+     * Incluye logs detallados para detectar errores 400, 409, 500.
      */
     suspend fun registrarUsuario(
         rut: String,
@@ -47,9 +39,41 @@ class AuthRepository {
         email: String,
         contrasena: String
     ): Boolean {
-        // TODO: Cuando tu Backend tenga lista la URL de registro,
-        // aquí llamaremos a RetrofitClient.api.registrar(...)
+        return try {
+            // 1. Empaquetamos los datos en el objeto User
+            // Asegúrate de que los nombres de parámetros coincidan con tu modelo User actualizado
+            val nuevoUsuario = User(
+                rut = rut,
+                nombre = nombre,
+                fechaNacimiento = fechaNacimiento,
+                telefono = telefono,
+                user = email,      // Mapeamos el email al campo 'user'
+                password = contrasena
+            )
 
-        return true // Simulamos éxito para que puedas avanzar con la UI
+            // 2. Llamamos a la API
+            val response = RetrofitClient.api.registrar(nuevoUsuario)
+
+            // 3. --- DIAGNÓSTICO DE ERRORES ---
+            // Esto imprimirá en el Logcat la razón exacta si el servidor rechaza el registro
+            if (!response.isSuccessful) {
+                println("❌ ERROR AL REGISTRAR:")
+                println("   -> Código HTTP: ${response.code()}") // Ej: 400, 409, 500
+                println("   -> Mensaje: ${response.message()}") // Ej: Bad Request
+                // El errorBody contiene el mensaje específico que programó tu compañero en el backend
+                println("   -> Cuerpo del Error: ${response.errorBody()?.string()}")
+            } else {
+                println("✅ REGISTRO EXITOSO: Código ${response.code()}")
+            }
+
+            // 4. Retornamos true solo si fue exitoso (200-299)
+            response.isSuccessful
+
+        } catch (e: Exception) {
+            // Esto ocurre si el servidor está apagado o no hay internet
+            println("❌ ERROR DE CONEXIÓN (Excepción): ${e.message}")
+            e.printStackTrace()
+            false
+        }
     }
 }

@@ -11,6 +11,11 @@ interface ApiService {
     @POST("login")
     suspend fun login(@Body request: User): Response<User>
 
+    // AGREGADO: Endpoint para registrar usuarios
+    // Nota: Asegúrate que tu backend escuche en "register" o "auth/register"
+    @POST("register")
+    suspend fun registrar(@Body request: User): Response<User>
+
     @GET("servicios")
     suspend fun getServicios(): Response<List<Servicio>>
 }

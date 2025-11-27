@@ -45,7 +45,8 @@ fun MainScreen() {
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
         Rutas.RecuperarContrasena.ruta,
-        Rutas.Inicio.ruta
+        Rutas.Inicio.ruta,
+        Rutas.ValidarCarnet.ruta
     )
 
     val showNav = currentRoute?.startsWith("Inicio") == false && currentRoute !in noNavRoutes
