@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.veritrustmobile"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -62,4 +62,21 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // JUnit 4 (Estándar para Unit Tests)
+    testImplementation("junit:junit:4.13.2")
+
+    // Mockito (Para crear objetos falsos)
+    testImplementation("org.mockito:mockito-core:5.3.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0") // Para mockear clases finales
+
+    // Kotest (Para aserciones legibles "shouldBe")
+    testImplementation("io.kotest:kotest-assertions-core:5.6.2")
+
+    // Corrutinas Test (Vital para ViewModels)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

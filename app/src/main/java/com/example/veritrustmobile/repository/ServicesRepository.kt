@@ -1,37 +1,23 @@
 package com.example.veritrustmobile.repository
 
-import android.content.Context
 import com.example.veritrustmobile.model.Servicio
+import com.example.veritrustmobile.data.RetrofitClient
 
+class ServicesRepository {
 
-class ServicesRepository(context: Context) {
+    suspend fun getAllServices(): List<Servicio> {
+        return try {
+            val response = RetrofitClient.api.getServicios()
 
-    private val dbHelper = Database(context)
-
-    fun getAllServices(): List<Servicio> {
-        val db = dbHelper.readableDatabase
-        val servicesList = mutableListOf<Servicio>()
-
-        val cursor = db.query(
-            Database.ServicesTable.TABLE_NAME,
-            null, // null devuelve todas las columnas.
-            null, null, null, null,
-            null  // Sin orden específico.
-        )
-
-        with(cursor) {
-            while (moveToNext()) {
-                val nombre = getString(getColumnIndexOrThrow(Database.ServicesTable.COLUMN_NAME_NOMBRE))
-                val descripcion = getString(getColumnIndexOrThrow(Database.ServicesTable.COLUMN_NAME_DESCRIPCION))
-                val precio = getInt(getColumnIndexOrThrow(Database.ServicesTable.COLUMN_NAME_PRECIO))
-                val detallesString = getString(getColumnIndexOrThrow(Database.ServicesTable.COLUMN_NAME_DETALLES))
-
-                val detallesList = detallesString.split("|")
-
-                servicesList.add(Servicio(nombre, descripcion, precio, detallesList))
+            if (response.isSuccessful) {
+                response.body() ?: emptyList()
+            } else {
+                println("Error API: ${response.code()}")
+                emptyList()
             }
+        } catch (e: Exception) {
+            println("Error de conexión: ${e.message}")
+            emptyList()
         }
-        cursor.close()
-        return servicesList
     }
 }

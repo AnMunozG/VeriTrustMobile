@@ -80,6 +80,10 @@ fun MainScreen() {
             }
         }
     } else {
-        NavGraph(navController = navController)
+        Scaffold { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                NavGraph(navController = navController)
+            }
+        }
     }
 }

@@ -1,23 +1,19 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-// 1. Cambia la herencia a AndroidViewModel
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.veritrustmobile.repository.AuthRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
+class AccederViewModel : ViewModel() {
 
-class AccederViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val authRepository = AuthRepository(application.applicationContext)
+    // Repo sin contexto
+    private val authRepository = AuthRepository()
 
     var email by mutableStateOf("")
         private set
@@ -41,7 +37,6 @@ class AccederViewModel(application: Application) : AndroidViewModel(application)
         loginError = null
     }
 
-
     fun onLoginClick() {
         if (email.isBlank() || password.isBlank()) {
             loginError = "El correo y la contraseña no pueden estar vacíos."
@@ -51,9 +46,8 @@ class AccederViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             isLoading = true
             try {
-                val user = withContext(Dispatchers.IO) {
-                    authRepository.findUserByCredentials(email, password)
-                }
+                // Llamamos a la nueva función login del repositorio
+                val user = authRepository.login(email, password)
 
                 if (user != null) {
                     _navigationEvent.emit(NavigationEvent.NavigateToHome(user.user))
@@ -61,8 +55,7 @@ class AccederViewModel(application: Application) : AndroidViewModel(application)
                     loginError = "El correo o la contraseña no coinciden."
                 }
             } catch (e: Exception) {
-                loginError = "Ocurrió un error inesperado. Inténtalo de nuevo."
-                e.printStackTrace()
+                loginError = "Error de conexión. Inténtalo más tarde."
             } finally {
                 isLoading = false
             }
@@ -72,5 +65,4 @@ class AccederViewModel(application: Application) : AndroidViewModel(application)
     sealed class NavigationEvent {
         data class NavigateToHome(val userEmail: String) : NavigationEvent()
     }
-
 }

@@ -1,25 +1,23 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.veritrustmobile.repository.AuthRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-class RegistroViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val authRepository = AuthRepository(application.applicationContext)
+class RegistroViewModel(
+    // Inyección de dependencias: permite pasar un Mock en los tests o usar el real por defecto
+    private val authRepository: AuthRepository = AuthRepository()
+) : ViewModel() {
 
     // --- Estados del formulario ---
     var rut by mutableStateOf(""); private set
@@ -47,7 +45,7 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    // --- Funciones on...Change (para actualizar el estado desde la UI) ---
+    // --- Setters ---
     fun onRutChange(value: String) { rut = value; errorRut = null }
     fun onNombreChange(value: String) { nombre = value; errorNombre = null }
     fun onFechaNacimientoChange(value: String) { fechaNacimiento = value; errorFechaNacimiento = null }
@@ -59,7 +57,8 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     fun onTerminosChange(value: Boolean) { terminosAceptados = value; errorTerminos = null }
 
     /**
-     * Inicia el proceso de registro. Ahora valida primero y luego emite el evento.
+     * Valida el formulario localmente. Si todo está bien,
+     * navega a la pantalla de validar carnet.
      */
     fun onRegistroSubmit() {
         if (validarFormulario()) {
@@ -70,28 +69,28 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
-     * Llama al repositorio para guardar el usuario en la base de datos.
+     * Llama al API para crear el usuario en el servidor.
      */
     fun finalizarRegistro() {
         viewModelScope.launch {
             estaCargando = true
             try {
-                val registroExitoso = withContext(Dispatchers.IO) {
-                    authRepository.registrarUsuario(
-                        rut = rut,
-                        nombre = nombre,
-                        fechaNacimiento = fechaNacimiento,
-                        telefono = telefono,
-                        email = email,
-                        contrasena = contrasena
-                    )
-                }
+                val registroExitoso = authRepository.registrarUsuario(
+                    rut = rut,
+                    nombre = nombre,
+                    fechaNacimiento = fechaNacimiento,
+                    telefono = telefono,
+                    email = email,
+                    contrasena = contrasena
+                )
                 if (registroExitoso) {
                     _navigationEvent.emit(NavigationEvent.NavigateToLogin)
                 } else {
-                    errorRut = "El RUT o el correo ya están registrados."
-                    errorEmail = "El RUT o el correo ya están registrados."
+                    errorRut = "Error al registrar. Inténtalo nuevamente."
+                    errorEmail = "El usuario ya podría existir."
                 }
+            } catch (e: Exception) {
+                errorRut = "Error de conexión con el servidor."
             } finally {
                 estaCargando = false
             }
@@ -107,13 +106,18 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             else -> null
         }
         errorTelefono = if (telefono.replace(Regex("[\\s+]"), "").matches(Regex("^\\d{7,15}$"))) null else "Número de teléfono inválido"
-        errorEmail = if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) null else "Correo inválido"
+
+        // --- CORRECCIÓN AQUÍ ---
+        // Usamos Regex nativo de Kotlin en lugar de android.util.Patterns para que funcione en los Tests Unitarios
+        val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
+        errorEmail = if (email.matches(emailRegex)) null else "Correo inválido"
+        // -----------------------
+
         errorConfirmarEmail = if (email == confirmarEmail) null else "Los correos no coinciden"
         errorContrasena = if (contrasena.length >= 6) null else "La contraseña debe tener al menos 6 caracteres"
         errorConfirmarContrasena = if (contrasena == confirmarContrasena) null else "Las contraseñas no coinciden"
         errorTerminos = if (terminosAceptados) null else "Debes aceptar los términos y condiciones"
 
-        // Retorna true solo si todos los campos de error son nulos.
         return listOfNotNull(errorRut, errorNombre, errorFechaNacimiento, errorTelefono, errorEmail, errorConfirmarEmail, errorContrasena, errorConfirmarContrasena, errorTerminos).isEmpty()
     }
 

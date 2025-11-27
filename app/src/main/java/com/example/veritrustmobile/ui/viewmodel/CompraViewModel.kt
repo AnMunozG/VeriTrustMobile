@@ -4,27 +4,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class CompraViewModel : ViewModel() {
 
-    var cardName by mutableStateOf("")
-        private set
-    var cardNumber by mutableStateOf("")
-        private set
+    // Campos del formulario
+    var cardName by mutableStateOf(""); private set
+    var cardNumber by mutableStateOf(""); private set
+    var expirationMonth by mutableStateOf(""); private set
+    var expirationYear by mutableStateOf(""); private set
+    var cvv by mutableStateOf(""); private set
 
-    var expirationMonth by mutableStateOf("")
-        private set
-
-    var expirationYear by mutableStateOf("")
-        private set
-
-    var cvv by mutableStateOf("")
-        private set
-
-    var uiMessage by mutableStateOf<String?>(null)
-        private set
-
+    // Estado de la UI
+    var uiMessage by mutableStateOf<String?>(null); private set
+    var isLoading by mutableStateOf(false); private set
 
     fun onCardNameChange(newName: String) {
         cardName = newName
@@ -57,22 +53,30 @@ class CompraViewModel : ViewModel() {
     fun processPayment() {
         uiMessage = null
 
-        when {
-            cardName.isBlank() -> uiMessage = "El nombre en la tarjeta es obligatorio."
-            !isCardNumberValid(cardNumber) -> uiMessage = "El número de tarjeta es inválido."
-            !isExpirationMonthValid(expirationMonth) -> uiMessage = "El mes de expiración es inválido."
-            !isExpirationYearValid(expirationYear) -> uiMessage = "El año de expiración es inválido."
-            !isCvvValid(cvv) -> uiMessage = "El CVV es inválido."
-            else -> {
-                uiMessage = "Pago realizado con éxito"
-                clearForm()
-            }
+        // Validaciones locales antes de enviar
+        if (cardName.isBlank()) { uiMessage = "El nombre es obligatorio."; return }
+        if (!isCardNumberValid(cardNumber)) { uiMessage = "Número de tarjeta inválido."; return }
+        if (!isExpirationMonthValid(expirationMonth)) { uiMessage = "Mes inválido."; return }
+        if (!isExpirationYearValid(expirationYear)) { uiMessage = "Año inválido."; return }
+        if (!isCvvValid(cvv)) { uiMessage = "CVV inválido."; return }
+
+        // Simulación de proceso de pago (Network Call)
+        viewModelScope.launch {
+            isLoading = true
+            // Simulamos 2 segundos de espera de conexión con el banco
+            delay(2000)
+
+            // Aquí iría la llamada a tu PaymentRepository si lo tuvieras
+            uiMessage = "Pago realizado con éxito"
+            clearForm()
+            isLoading = false
         }
     }
 
+    // --- Validaciones Privadas ---
+
     private fun isCardNumberValid(number: String): Boolean {
         if (!number.matches(Regex("^\\d{16}$"))) return false
-
         var sum = 0
         var isSecondDigit = false
         for (i in number.length - 1 downTo 0) {
@@ -108,4 +112,3 @@ class CompraViewModel : ViewModel() {
         cvv = ""
     }
 }
-
