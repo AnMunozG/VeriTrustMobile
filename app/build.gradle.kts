@@ -74,7 +74,7 @@ dependencies {
     // Mockito (Para crear objetos falsos)
     testImplementation("org.mockito:mockito-core:5.3.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
-    testImplementation("org.mockito:mockito-inline:5.2.0") // Para mockear clases finales
+    testImplementation("org.mockito:mockito-inline:5.2.0")
 
     // Kotest (Para aserciones legibles "shouldBe")
     testImplementation("io.kotest:kotest-assertions-core:5.6.2")

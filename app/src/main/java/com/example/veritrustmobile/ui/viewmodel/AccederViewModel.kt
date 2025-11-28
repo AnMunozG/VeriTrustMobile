@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 
 class AccederViewModel : ViewModel() {
 
-    // Repo sin contexto
     private val authRepository = AuthRepository()
 
     var email by mutableStateOf("")
@@ -46,7 +45,6 @@ class AccederViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                // Llamamos a la nueva función login del repositorio
                 val user = authRepository.login(email, password)
 
                 if (user != null) {

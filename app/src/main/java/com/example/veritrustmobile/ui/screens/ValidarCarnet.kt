@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
@@ -42,14 +41,14 @@ fun ValidarCarnetScreen(
 ) {
     val context = LocalContext.current
 
-    // Estados para las fotos
+    // ESTADO FOTO (SI SE SACO O NO)
     var uriFotoFrontal by remember { mutableStateOf<Uri?>(null) }
     var uriFotoTrasera by remember { mutableStateOf<Uri?>(null) }
 
     var tempUriFrontal by remember { mutableStateOf<Uri?>(null) }
     var tempUriTrasera by remember { mutableStateOf<Uri?>(null) }
 
-    // --- LAUNCHERS DE CÁMARA (Toman la foto) ---
+    // TOMAR FOTO
     val cameraLauncherFrontal = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { exitoso ->
@@ -62,15 +61,14 @@ fun ValidarCarnetScreen(
         if (exitoso && tempUriTrasera != null) uriFotoTrasera = tempUriTrasera
     }
 
-    // --- LAUNCHER DE PERMISOS (Pide permiso al usuario) ---
-    // Variable para saber qué botón apretó (0: ninguno, 1: frontal, 2: trasera)
+    // PEDIR PERMISO
+    // CUAL BOTON SE APRETO
     var botonPresionado by remember { mutableStateOf(0) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // Si dio permiso, lanzamos la cámara según el botón que apretó
             if (botonPresionado == 1) {
                 val uri = crearArchivoImagen(context)
                 tempUriFrontal = uri
@@ -85,13 +83,11 @@ fun ValidarCarnetScreen(
         }
     }
 
-    // --- FUNCIÓN PARA VERIFICAR Y LANZAR ---
     fun checkAndLaunchCamera(tipo: Int) {
         botonPresionado = tipo
         val permissionCheckResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
 
         if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-            // Ya tiene permiso, lanza directo
             if (tipo == 1) {
                 val uri = crearArchivoImagen(context)
                 tempUriFrontal = uri
@@ -102,12 +98,10 @@ fun ValidarCarnetScreen(
                 cameraLauncherTrasera.launch(uri)
             }
         } else {
-            // No tiene permiso, lo pide
             permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
-    // Navegación
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             if (event is RegistroViewModel.NavigationEvent.NavigateToLogin) {

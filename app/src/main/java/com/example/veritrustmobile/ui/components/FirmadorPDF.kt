@@ -15,7 +15,6 @@ fun simularFirmaDocumento(context: Context, inputUri: Uri): Uri? {
         val inputStream: InputStream? = context.contentResolver.openInputStream(inputUri)
         val documento = PDDocument.load(inputStream)
 
-        // Crear página extra
         val page = PDPage()
         documento.addPage(page)
 
@@ -27,7 +26,6 @@ fun simularFirmaDocumento(context: Context, inputUri: Uri): Uri? {
         content.endText()
         content.close()
 
-        // Guardar en descargas
         val outFile = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             "Documento_Firmado_Veritrust.pdf"

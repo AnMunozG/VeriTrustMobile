@@ -24,7 +24,7 @@ fun NavBar(
             Text("Servicios")
         }
 
-        Spacer(modifier = Modifier.height(20.dp)) // Espacio entre botones
+        Spacer(modifier = Modifier.height(20.dp))
 
         TextButton(onClick = {
             navController.navigate(Rutas.Nosotros.ruta)

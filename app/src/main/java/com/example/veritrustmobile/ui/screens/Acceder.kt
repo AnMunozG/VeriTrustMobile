@@ -40,8 +40,7 @@ fun Acceder(
 ) {
     val context = LocalContext.current
 
-    // --- LÓGICA DE VIBRACIÓN ---
-    // Si loginError cambia y no es nulo, vibra.
+    //PROBAR DESPUES SI VIBRA O NO
     LaunchedEffect(viewModel.loginError) {
         if (viewModel.loginError != null) {
             vibrarCelular(context)
@@ -196,7 +195,6 @@ fun Acceder(
     }
 }
 
-// --- FUNCIÓN DE VIBRACIÓN ---
 private fun vibrarCelular(context: Context) {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager

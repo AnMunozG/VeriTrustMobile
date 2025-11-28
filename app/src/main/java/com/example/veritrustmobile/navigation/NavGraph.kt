@@ -13,14 +13,14 @@ import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
 fun NavGraph(navController: NavHostController) {
-    // ViewModel compartido entre Registro y ValidarCarnet
+
     val registroViewModel: RegistroViewModel = viewModel()
 
     NavHost(
         navController = navController,
         startDestination = Rutas.Inicio.ruta
     ) {
-        // --- 1. PANTALLA DE INICIO ---
+        // PANTALLA DE INICIO
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
@@ -33,16 +33,15 @@ fun NavGraph(navController: NavHostController) {
             Inicio(navController = navController, user = user)
         }
 
-        // --- 2. PANTALLA DE SERVICIOS (Optimizado) ---
+        // PANTALLA DE SERVICIOS
         composable(
-            route = Rutas.Servicios.ruta, // Usa la referencia segura del objeto Rutas
+            route = Rutas.Servicios.ruta,
             arguments = listOf(navArgument("esInvitado") {
                 type = NavType.BoolType
             })
         ) { backStackEntry ->
             val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
 
-            // ViewModel exclusivo para esta pantalla
             val serviciosViewModel: ServiciosViewModel = viewModel()
 
             ServiciosScreen(
@@ -52,7 +51,7 @@ fun NavGraph(navController: NavHostController) {
             )
         }
 
-        // --- 3. PANTALLAS SIMPLES ---
+        //OTRAS PANTALLAS
         composable(Rutas.Nosotros.ruta) {
             Nosotros()
         }

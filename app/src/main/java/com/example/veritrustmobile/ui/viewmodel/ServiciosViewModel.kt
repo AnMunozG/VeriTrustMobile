@@ -1,6 +1,6 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import androidx.lifecycle.ViewModel // Usamos ViewModel normal
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.repository.ServicesRepository

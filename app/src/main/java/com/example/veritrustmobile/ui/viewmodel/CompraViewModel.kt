@@ -11,14 +11,13 @@ import java.util.Calendar
 
 class CompraViewModel : ViewModel() {
 
-    // Campos del formulario
+    // CAMPOS FORMULARIO
     var cardName by mutableStateOf(""); private set
     var cardNumber by mutableStateOf(""); private set
     var expirationMonth by mutableStateOf(""); private set
     var expirationYear by mutableStateOf(""); private set
     var cvv by mutableStateOf(""); private set
 
-    // Estado de la UI
     var uiMessage by mutableStateOf<String?>(null); private set
     var isLoading by mutableStateOf(false); private set
 
@@ -53,27 +52,23 @@ class CompraViewModel : ViewModel() {
     fun processPayment() {
         uiMessage = null
 
-        // Validaciones locales antes de enviar
+        // VALIDACIONES
         if (cardName.isBlank()) { uiMessage = "El nombre es obligatorio."; return }
         if (!isCardNumberValid(cardNumber)) { uiMessage = "Número de tarjeta inválido."; return }
         if (!isExpirationMonthValid(expirationMonth)) { uiMessage = "Mes inválido."; return }
         if (!isExpirationYearValid(expirationYear)) { uiMessage = "Año inválido."; return }
         if (!isCvvValid(cvv)) { uiMessage = "CVV inválido."; return }
 
-        // Simulación de proceso de pago (Network Call)
+        // SIMULAR PAGO
         viewModelScope.launch {
             isLoading = true
-            // Simulamos 2 segundos de espera de conexión con el banco
             delay(2000)
 
-            // Aquí iría la llamada a tu PaymentRepository si lo tuvieras
             uiMessage = "Pago realizado con éxito"
             clearForm()
             isLoading = false
         }
     }
-
-    // --- Validaciones Privadas ---
 
     private fun isCardNumberValid(number: String): Boolean {
         if (!number.matches(Regex("^\\d{16}$"))) return false

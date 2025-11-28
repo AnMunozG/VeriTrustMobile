@@ -59,12 +59,11 @@ fun ServiciosScreen(
         }
 
         if (isLoading) {
-            items(3) { // Muestra 3 placeholders mientras carga
+            items(3) {
                 ShimmerLoadingCard()
             }
         } else {
             items(services, key = { it.nombre }) { servicio ->
-                // Animación para cada tarjeta al aparecer
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
@@ -183,7 +182,7 @@ fun ShimmerLoadingCard() {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
-            Spacer(modifier = Modifier.height(120.dp)) // Espacio para simular el contenido
+            Spacer(modifier = Modifier.height(120.dp))
         }
     }
 }

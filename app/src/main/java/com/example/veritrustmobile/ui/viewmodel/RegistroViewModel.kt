@@ -15,11 +15,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 class RegistroViewModel(
-    // Inyección de dependencias: permite pasar un Mock en los tests o usar el real por defecto
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
-    // --- Estados del formulario ---
+    // ESTADOS
     var rut by mutableStateOf(""); private set
     var nombre by mutableStateOf(""); private set
     var fechaNacimiento by mutableStateOf(""); private set
@@ -31,7 +30,7 @@ class RegistroViewModel(
     var terminosAceptados by mutableStateOf(false); private set
     var estaCargando by mutableStateOf(false); private set
 
-    // --- Estados de error ---
+    // ERRORES
     var errorRut by mutableStateOf<String?>(null); private set
     var errorNombre by mutableStateOf<String?>(null); private set
     var errorFechaNacimiento by mutableStateOf<String?>(null); private set
@@ -45,7 +44,7 @@ class RegistroViewModel(
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    // --- Setters ---
+    // NO LEER
     fun onRutChange(value: String) { rut = value; errorRut = null }
     fun onNombreChange(value: String) { nombre = value; errorNombre = null }
     fun onFechaNacimientoChange(value: String) { fechaNacimiento = value; errorFechaNacimiento = null }
@@ -56,10 +55,6 @@ class RegistroViewModel(
     fun onConfirmarContrasenaChange(value: String) { confirmarContrasena = value; errorConfirmarContrasena = null }
     fun onTerminosChange(value: Boolean) { terminosAceptados = value; errorTerminos = null }
 
-    /**
-     * Valida el formulario localmente. Si todo está bien,
-     * navega a la pantalla de validar carnet.
-     */
     fun onRegistroSubmit() {
         if (validarFormulario()) {
             viewModelScope.launch {
@@ -68,9 +63,6 @@ class RegistroViewModel(
         }
     }
 
-    /**
-     * Llama al API para crear el usuario en el servidor.
-     */
     fun finalizarRegistro() {
         viewModelScope.launch {
             estaCargando = true
@@ -107,11 +99,8 @@ class RegistroViewModel(
         }
         errorTelefono = if (telefono.replace(Regex("[\\s+]"), "").matches(Regex("^\\d{7,15}$"))) null else "Número de teléfono inválido"
 
-        // --- CORRECCIÓN AQUÍ ---
-        // Usamos Regex nativo de Kotlin en lugar de android.util.Patterns para que funcione en los Tests Unitarios
         val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
         errorEmail = if (email.matches(emailRegex)) null else "Correo inválido"
-        // -----------------------
 
         errorConfirmarEmail = if (email == confirmarEmail) null else "Los correos no coinciden"
         errorContrasena = if (contrasena.length >= 6) null else "La contraseña debe tener al menos 6 caracteres"
