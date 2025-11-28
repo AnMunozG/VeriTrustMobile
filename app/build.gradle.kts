@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.veritrustmobile"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -42,8 +42,10 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
-    implementation("androidx.compose.material:material-icons-extended-android:1.7.8")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("com.google.accompanist:accompanist-placeholder-material3:0.36.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -63,11 +65,20 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Retrofit y Gson
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    implementation("androidx.compose.material3:material3:1.5.3")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    // JUnit 4 (Estándar para Unit Tests)
+    testImplementation("junit:junit:4.13.2")
 
+    // Mockito (Para crear objetos falsos)
+    testImplementation("org.mockito:mockito-core:5.3.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+
+    // Kotest (Para aserciones legibles "shouldBe")
+    testImplementation("io.kotest:kotest-assertions-core:5.6.2")
+
+    // Corrutinas Test (Vital para ViewModels)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

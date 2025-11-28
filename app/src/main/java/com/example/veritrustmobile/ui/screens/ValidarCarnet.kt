@@ -1,36 +1,106 @@
 package com.example.veritrustmobile.ui.screens
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.veritrustmobile.navigation.Rutas
-import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Composable
 fun ValidarCarnetScreen(
     navController: NavController,
     viewModel: RegistroViewModel = viewModel()
 ) {
-    var fotoFrontalTomada by remember { mutableStateOf(false) }
-    var fotoTraseraTomada by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // ESTADO FOTO (SI SE SACO O NO)
+    var uriFotoFrontal by remember { mutableStateOf<Uri?>(null) }
+    var uriFotoTrasera by remember { mutableStateOf<Uri?>(null) }
+
+    var tempUriFrontal by remember { mutableStateOf<Uri?>(null) }
+    var tempUriTrasera by remember { mutableStateOf<Uri?>(null) }
+
+    // TOMAR FOTO
+    val cameraLauncherFrontal = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { exitoso ->
+        if (exitoso && tempUriFrontal != null) uriFotoFrontal = tempUriFrontal
+    }
+
+    val cameraLauncherTrasera = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { exitoso ->
+        if (exitoso && tempUriTrasera != null) uriFotoTrasera = tempUriTrasera
+    }
+
+    // PEDIR PERMISO
+    // CUAL BOTON SE APRETO
+    var botonPresionado by remember { mutableStateOf(0) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            if (botonPresionado == 1) {
+                val uri = crearArchivoImagen(context)
+                tempUriFrontal = uri
+                cameraLauncherFrontal.launch(uri)
+            } else if (botonPresionado == 2) {
+                val uri = crearArchivoImagen(context)
+                tempUriTrasera = uri
+                cameraLauncherTrasera.launch(uri)
+            }
+        } else {
+            Toast.makeText(context, "Se requiere permiso de cámara", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun checkAndLaunchCamera(tipo: Int) {
+        botonPresionado = tipo
+        val permissionCheckResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+
+        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+            if (tipo == 1) {
+                val uri = crearArchivoImagen(context)
+                tempUriFrontal = uri
+                cameraLauncherFrontal.launch(uri)
+            } else {
+                val uri = crearArchivoImagen(context)
+                tempUriTrasera = uri
+                cameraLauncherTrasera.launch(uri)
+            }
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -42,28 +112,24 @@ fun ValidarCarnetScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background // Fondo temático
-    ) { paddingValues ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Validación de Identidad",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Por favor, toma una foto de la parte frontal y trasera de tu carnet de identidad.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Toma una foto real de tu carnet.",
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -71,26 +137,38 @@ fun ValidarCarnetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                FotoCarnet(texto = "Parte Frontal", fotoTomada = fotoFrontalTomada) {
-                    fotoFrontalTomada = true
-                }
-                FotoCarnet(texto = "Parte Trasera", fotoTomada = fotoTraseraTomada) {
-                    fotoTraseraTomada = true
-                }
+                // FOTO FRONTAL
+                FotoCarnetItem(
+                    texto = "Frontal",
+                    uriFoto = uriFotoFrontal,
+                    onTomarFoto = { checkAndLaunchCamera(1) } // 1 = Frontal
+                )
+
+                // FOTO TRASERA
+                FotoCarnetItem(
+                    texto = "Trasera",
+                    uriFoto = uriFotoTrasera,
+                    onTomarFoto = { checkAndLaunchCamera(2) } // 2 = Trasera
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+
+            if (viewModel.errorRut != null) {
+                Text(
+                    text = viewModel.errorRut ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
 
             if (viewModel.estaCargando) {
                 CircularProgressIndicator()
             } else {
                 Button(
                     onClick = { viewModel.finalizarRegistro() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    enabled = fotoFrontalTomada && fotoTraseraTomada
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    enabled = uriFotoFrontal != null && uriFotoTrasera != null
                 ) {
                     Text("Finalizar Validación")
                 }
@@ -100,48 +178,45 @@ fun ValidarCarnetScreen(
 }
 
 @Composable
-private fun FotoCarnet(texto: String, fotoTomada: Boolean, alTomarFoto: () -> Unit) {
+fun FotoCarnetItem(texto: String, uriFoto: Uri?, onTomarFoto: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Card(
             modifier = Modifier.size(width = 150.dp, height = 100.dp),
             elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Color temático
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(
-                        width = 2.dp,
-                        color = if (fotoTomada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, // Colores temáticos
-                        shape = MaterialTheme.shapes.medium
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (fotoTomada) {
-                    Text("✓ Foto Capturada", color = MaterialTheme.colorScheme.primary)
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (uriFoto != null) {
+                    AsyncImage(
+                        model = uriFoto,
+                        contentDescription = "Foto tomada",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 } else {
                     Image(
-                        Icons.Filled.CameraAlt,
+                        imageVector = Icons.Filled.CameraAlt,
                         contentDescription = "Cámara",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                     )
                 }
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = alTomarFoto) {
-            Text(texto)
+        Button(onClick = onTomarFoto) {
+            Text(if (uriFoto == null) texto else "Repetir")
         }
     }
 }
 
-@Preview(name = "Light Mode", showBackground = true)
-@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun ValidarCarnetScreenPreview() {
-    VeriTrustMobileTheme {
-        Surface {
-            ValidarCarnetScreen(navController = rememberNavController())
-        }
-    }
+fun crearArchivoImagen(context: Context): Uri {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    val storageDir = context.externalCacheDir
+    val image = File.createTempFile(imageFileName, ".jpg", storageDir)
+    return FileProvider.getUriForFile(
+        context,
+        "com.example.veritrustmobile.provider",
+        image
+    )
 }

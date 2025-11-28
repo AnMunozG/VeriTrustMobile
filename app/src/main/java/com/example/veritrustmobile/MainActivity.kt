@@ -13,19 +13,34 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.veritrustmobile.ui.components.NavBar
 import com.example.veritrustmobile.navigation.NavGraph
 import com.example.veritrustmobile.navigation.Rutas
+import com.example.veritrustmobile.ui.components.NavBar
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader // <--- IMPORTANTE
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. INICIALIZAR SESSION MANAGER
+        SessionManager.init(this)
+
+        // 2. INICIALIZAR LIBRERÍA PDF (OBLIGATORIO PARA QUE NO CRASHEE AL FIRMAR)
+        PDFBoxResourceLoader.init(applicationContext)
+
+        // 3. CALCULAR RUTA INICIAL
+        val startDestination = if (SessionManager.getToken() != null) {
+            Rutas.Servicios.crearRuta(false)
+        } else {
+            Rutas.Inicio.ruta
+        }
+
         enableEdgeToEdge()
         setContent {
             VeriTrustMobileTheme(dynamicColor = false) {
-                MainScreen()
+                MainScreen(startDestination)
             }
         }
     }
@@ -33,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(startDestination: String) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -45,15 +60,18 @@ fun MainScreen() {
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
         Rutas.RecuperarContrasena.ruta,
-        Rutas.Inicio.ruta
+        Rutas.ValidarCarnet.ruta
     )
 
-    val showNav = currentRoute?.startsWith("Inicio") == false && currentRoute !in noNavRoutes
+    val showNav = currentRoute != null &&
+            !currentRoute.startsWith("inicio") &&
+            noNavRoutes.none { currentRoute == it }
 
-    if (showNav) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = showNav,
+        drawerContent = {
+            if (showNav) {
                 ModalDrawerSheet {
                     NavBar(
                         navController = navController,
@@ -61,9 +79,11 @@ fun MainScreen() {
                     )
                 }
             }
-        ) {
-            Scaffold(
-                topBar = {
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                if (showNav) {
                     TopAppBar(
                         title = { Text("VeriTrust Mobile") },
                         navigationIcon = {
@@ -73,13 +93,11 @@ fun MainScreen() {
                         }
                     )
                 }
-            ) { padding ->
-                Box(modifier = Modifier.padding(padding)) {
-                    NavGraph(navController = navController)
-                }
+            }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                NavGraph(navController = navController, startDestination = startDestination)
             }
         }
-    } else {
-        NavGraph(navController = navController)
     }
 }

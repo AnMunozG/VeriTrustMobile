@@ -1,51 +1,53 @@
 package com.example.veritrustmobile.repository
 
-import android.content.ContentValues
-import android.content.Context
 import com.example.veritrustmobile.model.User
+import com.example.veritrustmobile.data.RetrofitClient
 
-class AuthRepository(context: Context) {
+class AuthRepository {
 
-    private val dbHelper = Database(context)
-    fun registrarUsuario(
-        rut: String,
-        nombre: String,
-        fechaNacimiento: String,
-        telefono: String,
-        email: String,
-        contrasena: String
-    ): Boolean {
-        val db = dbHelper.writableDatabase
+    suspend fun login(email: String, pass: String): User? {
+        return try {
+            val userRequest = User(user = email, password = pass)
 
-        val values = ContentValues().apply {
-            put(Database.UsersTable.COLUMN_NAME_RUT, rut)
-            put(Database.UsersTable.COLUMN_NAME_NOMBRE_COMPLETO, nombre)
-            put(Database.UsersTable.COLUMN_NAME_FECHA_NACIMIENTO, fechaNacimiento)
-            put(Database.UsersTable.COLUMN_NAME_TELEFONO, telefono)
-            put(Database.UsersTable.COLUMN_NAME_EMAIL, email)
-            put(Database.UsersTable.COLUMN_NAME_PASSWORD_HASH, contrasena)
+            val response = RetrofitClient.api.login(userRequest)
+
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                println("ERROR LOGIN CÓDIGO: ${response.code()}")
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-
-        val newRowId = db.insert(Database.UsersTable.TABLE_NAME, null, values)
-        return newRowId != -1L
     }
 
-    /**
-     * Busca un usuario por su correo y contraseña.
-     */
-    fun findUserByCredentials(email: String, password: String): User? {
-        val db = dbHelper.readableDatabase
-        val selection = "${Database.UsersTable.COLUMN_NAME_EMAIL} = ? AND ${Database.UsersTable.COLUMN_NAME_PASSWORD_HASH} = ?"
-        val selectionArgs = arrayOf(email, password)
-        val cursor = db.query(Database.UsersTable.TABLE_NAME, null, selection, selectionArgs, null, null, null)
-        var user: User? = null
-        with(cursor) {
-            if (moveToFirst()) {
-                val userEmail = getString(getColumnIndexOrThrow(Database.UsersTable.COLUMN_NAME_EMAIL))
-                user = User(userEmail, "")
+    suspend fun registrarUsuario(
+        rut: String, nombre: String, fechaNacimiento: String,
+        telefono: String, email: String, contrasena: String
+    ): Boolean {
+        return try {
+            val nuevoUsuario = User(
+                rut = rut,
+                nombre = nombre,
+                fechaNacimiento = fechaNacimiento,
+                telefono = telefono,
+                user = email,
+                password = contrasena
+            )
+            val response = RetrofitClient.api.registrar(nuevoUsuario)
+
+            if (!response.isSuccessful) {
+                println("ERROR REGISTRO: ${response.code()} - ${response.errorBody()?.string()}")
             }
+
+            response.isSuccessful
+
+        } catch (e: Exception) {
+            println("ERROR CONEXIÓN: ${e.message}")
+            e.printStackTrace()
+            false
         }
-        cursor.close()
-        return user
     }
 }

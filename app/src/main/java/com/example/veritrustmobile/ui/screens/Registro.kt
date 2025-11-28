@@ -55,7 +55,7 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
-            .verticalScroll(rememberScrollState()), // Permite el scroll en pantallas pequeñas.
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

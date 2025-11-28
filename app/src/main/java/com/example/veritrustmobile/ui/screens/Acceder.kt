@@ -1,6 +1,10 @@
 package com.example.veritrustmobile.ui.screens
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +38,15 @@ fun Acceder(
     navController: NavController,
     viewModel: AccederViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
+    //PROBAR DESPUES SI VIBRA O NO
+    LaunchedEffect(viewModel.loginError) {
+        if (viewModel.loginError != null) {
+            vibrarCelular(context)
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
@@ -181,13 +195,27 @@ fun Acceder(
     }
 }
 
-@Preview(name = "Light Mode", showBackground = true)
-@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
+private fun vibrarCelular(context: Context) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        vibratorManager.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+        @Suppress("DEPRECATION")
+        vibrator.vibrate(500)
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 fun PreviewAcceder() {
     VeriTrustMobileTheme {
-        Surface {
-            Acceder(navController = rememberNavController())
-        }
+        Acceder(navController = rememberNavController())
     }
 }
