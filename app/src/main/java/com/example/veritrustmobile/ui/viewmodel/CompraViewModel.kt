@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -21,6 +23,10 @@ class CompraViewModel : ViewModel() {
     // Estado de la UI
     var uiMessage by mutableStateOf<String?>(null); private set
     var isLoading by mutableStateOf(false); private set
+
+    // EVENTO DE NAVEGACIÓN (Para avisar a la UI que el pago funcionó)
+    private val _navigationEvent = MutableSharedFlow<Boolean>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     fun onCardNameChange(newName: String) {
         cardName = newName
@@ -66,10 +72,14 @@ class CompraViewModel : ViewModel() {
             // Simulamos 2 segundos de espera de conexión con el banco
             delay(2000)
 
-            // Aquí iría la llamada a tu PaymentRepository si lo tuvieras
+            // Lógica de éxito
             uiMessage = "Pago realizado con éxito"
-            clearForm()
             isLoading = false
+
+            // EMITIMOS LA SEÑAL DE ÉXITO PARA NAVEGAR
+            _navigationEvent.emit(true)
+
+            clearForm()
         }
     }
 

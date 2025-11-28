@@ -59,12 +59,12 @@ fun ServiciosScreen(
         }
 
         if (isLoading) {
-            items(3) { // Muestra 3 placeholders mientras carga
+            items(3) {
                 ShimmerLoadingCard()
             }
         } else {
-            items(services, key = { it.nombre }) { servicio ->
-                // Animación para cada tarjeta al aparecer
+            // Nota: Quitamos key = { it.nombre } por seguridad si hay duplicados
+            items(services) { servicio ->
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
@@ -76,8 +76,13 @@ fun ServiciosScreen(
                     ServicioCard(
                         servicio = servicio,
                         onComprarClick = {
-                            navController.navigate(Rutas.Comprar.ruta)
-                            println("Navegando a la compra de: ${servicio.nombre}")
+                            // AQUÍ PASAMOS LOS DATOS A LA PANTALLA DE COMPRA
+                            val rutaCompra = Rutas.Comprar.crearRuta(
+                                nombre = servicio.nombre,
+                                // Convertimos el precio a Int (si es Double en tu modelo)
+                                precio = servicio.precio.toInt()
+                            )
+                            navController.navigate(rutaCompra)
                         },
                         esInvitado = esInvitado
                     )
@@ -183,15 +188,10 @@ fun ShimmerLoadingCard() {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
-            Spacer(modifier = Modifier.height(120.dp)) // Espacio para simular el contenido
+            Spacer(modifier = Modifier.height(120.dp))
         }
     }
 }
-
-private val previewServices = listOf(
-    Servicio("Firma Electrónica Simple", "Certificado Digital", 15390, listOf("Válida para trámites tributarios", "Firma desde cualquier dispositivo")),
-    Servicio("Firma Electrónica Avanzada", "e-token", 21990, listOf("Constitución de empresas", "Mayor nivel de seguridad"))
-)
 
 @Preview(showBackground = true, name = "Pantalla de Servicios (Invitado)")
 @Composable
@@ -199,30 +199,6 @@ fun ServiciosScreenPreview() {
     VeriTrustMobileTheme(dynamicColor = false) {
         Surface {
             ServiciosScreen(rememberNavController(), esInvitado = true)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Tarjeta de Servicio")
-@Composable
-fun ServicioCardPreview() {
-    VeriTrustMobileTheme(dynamicColor = false) {
-        Surface(modifier = Modifier.padding(16.dp)) {
-            ServicioCard(
-                servicio = previewServices.first(),
-                onComprarClick = {},
-                esInvitado = false
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Efecto de Carga (Shimmer)")
-@Composable
-fun ShimmerLoadingPreview() {
-    VeriTrustMobileTheme(dynamicColor = false) {
-        Surface(modifier = Modifier.padding(16.dp)) {
-            ShimmerLoadingCard()
         }
     }
 }
