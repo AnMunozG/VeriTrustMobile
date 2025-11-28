@@ -12,15 +12,16 @@ import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
 import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
-fun NavGraph(navController: NavHostController) {
-    // ViewModel compartido entre Registro y ValidarCarnet
+fun NavGraph(
+    navController: NavHostController,
+    startDestination: String // <--- NUEVO PARÁMETRO
+) {
     val registroViewModel: RegistroViewModel = viewModel()
 
     NavHost(
         navController = navController,
-        startDestination = Rutas.Inicio.ruta
+        startDestination = startDestination // <--- USARLO AQUÍ
     ) {
-        // --- 1. PANTALLA DE INICIO ---
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
@@ -33,16 +34,13 @@ fun NavGraph(navController: NavHostController) {
             Inicio(navController = navController, user = user)
         }
 
-        // --- 2. PANTALLA DE SERVICIOS (Optimizado) ---
         composable(
-            route = Rutas.Servicios.ruta, // Usa la referencia segura del objeto Rutas
+            route = Rutas.Servicios.ruta,
             arguments = listOf(navArgument("esInvitado") {
                 type = NavType.BoolType
             })
         ) { backStackEntry ->
             val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
-
-            // ViewModel exclusivo para esta pantalla
             val serviciosViewModel: ServiciosViewModel = viewModel()
 
             ServiciosScreen(
@@ -52,32 +50,11 @@ fun NavGraph(navController: NavHostController) {
             )
         }
 
-        // --- 3. PANTALLAS SIMPLES ---
-        composable(Rutas.Nosotros.ruta) {
-            Nosotros()
-        }
-
-        composable(Rutas.Acceder.ruta) {
-            Acceder(navController = navController)
-        }
-
-        composable(Rutas.Registro.ruta) {
-            RegistroScreen(navController = navController, viewModel = registroViewModel)
-        }
-
-        composable(Rutas.ValidarCarnet.ruta) {
-            ValidarCarnetScreen(navController = navController, viewModel = registroViewModel)
-        }
-
-        composable(Rutas.Comprar.ruta) {
-            PantallaCompra()
-        }
-
-        composable(Rutas.RecuperarContrasena.ruta){
-            RecuperarContrasenaScreen(navController = navController)
-        }
-        composable(Rutas.FirmarDocumento.ruta) {
-            FirmarDocumentoScreen()
-        }
+        composable(Rutas.Nosotros.ruta) { Nosotros() }
+        composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
+        composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }
+        composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController, viewModel = registroViewModel) }
+        composable(Rutas.Comprar.ruta) { PantallaCompra() }
+        composable(Rutas.RecuperarContrasena.ruta){ RecuperarContrasenaScreen(navController = navController) }
     }
 }

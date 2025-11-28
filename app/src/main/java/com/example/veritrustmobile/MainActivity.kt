@@ -22,10 +22,24 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. INICIALIZAR SESSION MANAGER
+        SessionManager.init(this)
+
+        // 2. CALCULAR RUTA INICIAL
+        // Si hay token guardado -> Servicios (usuario logueado)
+        // Si no hay token -> Inicio
+        val startDestination = if (SessionManager.getToken() != null) {
+            Rutas.Servicios.crearRuta(false)
+        } else {
+            Rutas.Inicio.ruta
+        }
+
         enableEdgeToEdge()
         setContent {
             VeriTrustMobileTheme(dynamicColor = false) {
-                MainScreen()
+                // Pasamos la ruta calculada
+                MainScreen(startDestination)
             }
         }
     }
@@ -33,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(startDestination: String) { // <--- RECIBE LA RUTA
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -41,7 +55,6 @@ fun MainScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Lista de rutas donde NO queremos barra superior ni menú lateral
     val noNavRoutes = listOf(
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
@@ -49,19 +62,13 @@ fun MainScreen() {
         Rutas.ValidarCarnet.ruta
     )
 
-    // Lógica para determinar si mostrar navegación:
-    // 1. La ruta actual no debe ser nula.
-    // 2. No debe empezar con "inicio" (para cubrir "inicio" e "inicio/{user}").
-    // 3. No debe estar en la lista de exclusión.
     val showNav = currentRoute != null &&
             !currentRoute.startsWith("inicio") &&
             noNavRoutes.none { currentRoute == it }
 
-    // ESTRUCTURA CORREGIDA:
-    // El ModalNavigationDrawer envuelve todo, pero solo muestra contenido si showNav es true.
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = showNav, // Bloquea el deslizamiento si no hay menú
+        gesturesEnabled = showNav,
         drawerContent = {
             if (showNav) {
                 ModalDrawerSheet {
@@ -87,10 +94,9 @@ fun MainScreen() {
                 }
             }
         ) { padding ->
-            // IMPORTANTE: El NavGraph está siempre presente aquí.
-            // No lo ponemos dentro de un if/else, evitando que se destruya y cause el crash.
             Box(modifier = Modifier.padding(padding)) {
-                NavGraph(navController = navController)
+                // PASAMOS LA RUTA INICIAL AL NAVGRAPH
+                NavGraph(navController = navController, startDestination = startDestination)
             }
         }
     }
