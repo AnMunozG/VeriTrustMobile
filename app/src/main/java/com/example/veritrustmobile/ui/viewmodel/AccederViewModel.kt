@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.veritrustmobile.SessionManager // Importar el Manager
 import com.example.veritrustmobile.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -48,6 +49,9 @@ class AccederViewModel : ViewModel() {
                 val user = authRepository.login(email, password)
 
                 if (user != null) {
+                    // --- GUARDAR SESIÓN AQUÍ ---
+                    SessionManager.saveToken(user.user) // Usamos el email como token
+
                     _navigationEvent.emit(NavigationEvent.NavigateToHome(user.user))
                 } else {
                     loginError = "El correo o la contraseña no coinciden."

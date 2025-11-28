@@ -17,15 +17,30 @@ import com.example.veritrustmobile.navigation.NavGraph
 import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.components.NavBar
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader // <--- IMPORTANTE
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. INICIALIZAR SESSION MANAGER
+        SessionManager.init(this)
+
+        // 2. INICIALIZAR LIBRERÍA PDF (OBLIGATORIO PARA QUE NO CRASHEE AL FIRMAR)
+        PDFBoxResourceLoader.init(applicationContext)
+
+        // 3. CALCULAR RUTA INICIAL
+        val startDestination = if (SessionManager.getToken() != null) {
+            Rutas.Servicios.crearRuta(false)
+        } else {
+            Rutas.Inicio.ruta
+        }
+
         enableEdgeToEdge()
         setContent {
             VeriTrustMobileTheme(dynamicColor = false) {
-                MainScreen()
+                MainScreen(startDestination)
             }
         }
     }
@@ -33,14 +48,14 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(startDestination: String) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    
+
     val noNavRoutes = listOf(
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
@@ -81,7 +96,7 @@ fun MainScreen() {
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                NavGraph(navController = navController)
+                NavGraph(navController = navController, startDestination = startDestination)
             }
         }
     }

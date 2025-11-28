@@ -12,15 +12,16 @@ import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
 import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
-fun NavGraph(navController: NavHostController) {
-
+fun NavGraph(
+    navController: NavHostController,
+    startDestination: String // Parámetro para manejar la sesión
+) {
     val registroViewModel: RegistroViewModel = viewModel()
 
     NavHost(
         navController = navController,
-        startDestination = Rutas.Inicio.ruta
+        startDestination = startDestination
     ) {
-        // PANTALLA DE INICIO
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
@@ -33,7 +34,6 @@ fun NavGraph(navController: NavHostController) {
             Inicio(navController = navController, user = user)
         }
 
-        // PANTALLA DE SERVICIOS
         composable(
             route = Rutas.Servicios.ruta,
             arguments = listOf(navArgument("esInvitado") {
@@ -41,7 +41,6 @@ fun NavGraph(navController: NavHostController) {
             })
         ) { backStackEntry ->
             val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
-
             val serviciosViewModel: ServiciosViewModel = viewModel()
 
             ServiciosScreen(
@@ -51,32 +50,36 @@ fun NavGraph(navController: NavHostController) {
             )
         }
 
-        //OTRAS PANTALLAS
-        composable(Rutas.Nosotros.ruta) {
-            Nosotros()
+        // RUTA COMPRAR (CON ARGUMENTOS)
+        composable(
+            route = "comprar/{nombreServicio}/{precioServicio}",
+            arguments = listOf(
+                navArgument("nombreServicio") { type = NavType.StringType },
+                navArgument("precioServicio") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val nombre = backStackEntry.arguments?.getString("nombreServicio") ?: "Servicio"
+            val precio = backStackEntry.arguments?.getInt("precioServicio") ?: 0
+
+            PantallaCompra(
+                navController = navController,
+                nombreServicio = nombre,
+                precioServicio = precio
+            )
         }
 
-        composable(Rutas.Acceder.ruta) {
-            Acceder(navController = navController)
-        }
-
-        composable(Rutas.Registro.ruta) {
-            RegistroScreen(navController = navController, viewModel = registroViewModel)
-        }
-
-        composable(Rutas.ValidarCarnet.ruta) {
-            ValidarCarnetScreen(navController = navController, viewModel = registroViewModel)
-        }
-
-        composable(Rutas.Comprar.ruta) {
-            PantallaCompra()
-        }
-
-        composable(Rutas.RecuperarContrasena.ruta){
-            RecuperarContrasenaScreen(navController = navController)
-        }
+        // RUTA FIRMAR DOCUMENTO
         composable(Rutas.FirmarDocumento.ruta) {
             FirmarDocumentoScreen()
         }
+
+        composable(Rutas.Nosotros.ruta) { Nosotros() }
+        composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
+        composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }
+        composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController, viewModel = registroViewModel) }
+        composable(Rutas.RecuperarContrasena.ruta){ RecuperarContrasenaScreen(navController = navController) }
+
+        // Si creaste la ruta de perfil, agrégala también:
+        // composable(Rutas.Perfil.ruta) { PerfilScreen(navController = navController) }
     }
 }

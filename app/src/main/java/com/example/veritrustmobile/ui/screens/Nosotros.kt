@@ -1,17 +1,21 @@
 package com.example.veritrustmobile.ui.screens
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,46 +27,164 @@ fun Nosotros() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Sobre Nosotros",
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center,
+
+        // --- 1. ENCABEZADO SIMPLE (Logo y Título) ---
+        // Similar a tu pantalla de Inicio
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.VerifiedUser,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "VeriTrust",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Seguridad digital para todos",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        // --- 2. TARJETA DE MISIÓN (Estilo ServicioCard) ---
+        // Usamos ElevatedCard para mantener consistencia con la pantalla de Servicios
+        ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primary
-        )
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = "Nuestra Misión",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Facilitamos la vida de personas y empresas mediante soluciones de identidad digital seguras, legales y fáciles de usar. Eliminamos el papel para acelerar tus negocios.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
 
-        Text(
-            text = "SOLUCIONES INTEGRALES PARA EMPRESAS Y USUARIOS",
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        // --- 3. LISTA DE VALORES (Limpia) ---
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Por qué elegirnos",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 4.dp)
+            )
 
-        Text(
-            text = "En VeriTrust, nos dedicamos a ofrecer servicios de identidad digital de alta confiabilidad. Nuestra experiencia en certificación digital, firma electrónica y verificación de identidad permite a organizaciones y personas realizar sus gestiones en línea de manera segura, eficiente y conforme a los estándares legales y tecnológicos más exigentes.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            // Reutilizamos un diseño de fila simple
+            ValorItem(
+                icon = Icons.Outlined.Shield,
+                titulo = "Máxima Seguridad",
+                desc = "Protocolos de encriptación avanzados."
+            )
+            ValorItem(
+                icon = Icons.Outlined.Verified,
+                titulo = "Respaldo Legal",
+                desc = "Certificación acreditada por Carlos Abarzua."
+            )
+            ValorItem(
+                icon = Icons.Outlined.Devices,
+                titulo = "Multiplataforma",
+                desc = "Firma desde tu celular o computador."
+            )
+        }
 
-        Text(
-            text = "Desde certificados digitales hasta firmas electrónicas reconocidas por el SII, proporcionamos las herramientas necesarias para que tu empresa opere en el mundo digital con total tranquilidad y respaldo legal.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Divider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // --- 4. PIE DE PÁGINA (Contacto) ---
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "¿Necesitas ayuda?",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "contacto@veritrust.cl",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "+56 9 1111 1111",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "v1.0.0",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
     }
 }
 
-@Preview(name = "Light Mode", showBackground = true)
-@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
+// --- COMPONENTE REUTILIZABLE PEQUEÑO ---
 @Composable
-fun NosotrosPreview() {
-    VeriTrustMobileTheme {
-        Surface {
-            Nosotros()
+fun ValorItem(icon: ImageVector, titulo: String, desc: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
+            .padding(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(20.dp)
+            )
         }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewNosotros() {
+    VeriTrustMobileTheme {
+        Nosotros()
     }
 }
