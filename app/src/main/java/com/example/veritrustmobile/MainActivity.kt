@@ -13,9 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.veritrustmobile.ui.components.NavBar
 import com.example.veritrustmobile.navigation.NavGraph
 import com.example.veritrustmobile.navigation.Rutas
+import com.example.veritrustmobile.ui.components.NavBar
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 import kotlinx.coroutines.launch
 
@@ -41,20 +41,29 @@ fun MainScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // Lista de rutas donde NO queremos barra superior ni menú lateral
     val noNavRoutes = listOf(
         Rutas.Acceder.ruta,
         Rutas.Registro.ruta,
         Rutas.RecuperarContrasena.ruta,
-        Rutas.Inicio.ruta,
         Rutas.ValidarCarnet.ruta
     )
 
-    val showNav = currentRoute?.startsWith("Inicio") == false && currentRoute !in noNavRoutes
+    // Lógica para determinar si mostrar navegación:
+    // 1. La ruta actual no debe ser nula.
+    // 2. No debe empezar con "inicio" (para cubrir "inicio" e "inicio/{user}").
+    // 3. No debe estar en la lista de exclusión.
+    val showNav = currentRoute != null &&
+            !currentRoute.startsWith("inicio") &&
+            noNavRoutes.none { currentRoute == it }
 
-    if (showNav) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
+    // ESTRUCTURA CORREGIDA:
+    // El ModalNavigationDrawer envuelve todo, pero solo muestra contenido si showNav es true.
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = showNav, // Bloquea el deslizamiento si no hay menú
+        drawerContent = {
+            if (showNav) {
                 ModalDrawerSheet {
                     NavBar(
                         navController = navController,
@@ -62,9 +71,11 @@ fun MainScreen() {
                     )
                 }
             }
-        ) {
-            Scaffold(
-                topBar = {
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                if (showNav) {
                     TopAppBar(
                         title = { Text("VeriTrust Mobile") },
                         navigationIcon = {
@@ -74,14 +85,10 @@ fun MainScreen() {
                         }
                     )
                 }
-            ) { padding ->
-                Box(modifier = Modifier.padding(padding)) {
-                    NavGraph(navController = navController)
-                }
             }
-        }
-    } else {
-        Scaffold { padding ->
+        ) { padding ->
+            // IMPORTANTE: El NavGraph está siempre presente aquí.
+            // No lo ponemos dentro de un if/else, evitando que se destruya y cause el crash.
             Box(modifier = Modifier.padding(padding)) {
                 NavGraph(navController = navController)
             }

@@ -42,8 +42,8 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
-    implementation("androidx.compose.material:material-icons-extended-android:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("com.google.accompanist:accompanist-placeholder-material3:0.36.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
