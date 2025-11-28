@@ -32,46 +32,32 @@ class AuthRepository {
      * Incluye logs detallados para detectar errores 400, 409, 500.
      */
     suspend fun registrarUsuario(
-        rut: String,
-        nombre: String,
-        fechaNacimiento: String,
-        telefono: String,
-        email: String,
-        contrasena: String
+        rut: String, nombre: String, fechaNacimiento: String,
+        telefono: String, email: String, contrasena: String
     ): Boolean {
         return try {
-            // 1. Empaquetamos los datos en el objeto User
-            // Asegúrate de que los nombres de parámetros coincidan con tu modelo User actualizado
+            // 1. Crear el objeto con todos los datos
             val nuevoUsuario = User(
                 rut = rut,
                 nombre = nombre,
                 fechaNacimiento = fechaNacimiento,
                 telefono = telefono,
-                user = email,      // Mapeamos el email al campo 'user'
+                user = email,
                 password = contrasena
             )
 
-            // 2. Llamamos a la API
+            // 2. LLAMADA REAL A TU BACKEND
             val response = RetrofitClient.api.registrar(nuevoUsuario)
 
-            // 3. --- DIAGNÓSTICO DE ERRORES ---
-            // Esto imprimirá en el Logcat la razón exacta si el servidor rechaza el registro
+            // Logs para depurar si algo falla
             if (!response.isSuccessful) {
-                println("❌ ERROR AL REGISTRAR:")
-                println("   -> Código HTTP: ${response.code()}") // Ej: 400, 409, 500
-                println("   -> Mensaje: ${response.message()}") // Ej: Bad Request
-                // El errorBody contiene el mensaje específico que programó tu compañero en el backend
-                println("   -> Cuerpo del Error: ${response.errorBody()?.string()}")
-            } else {
-                println("✅ REGISTRO EXITOSO: Código ${response.code()}")
+                println("❌ ERROR REGISTRO: ${response.code()} - ${response.errorBody()?.string()}")
             }
 
-            // 4. Retornamos true solo si fue exitoso (200-299)
             response.isSuccessful
 
         } catch (e: Exception) {
-            // Esto ocurre si el servidor está apagado o no hay internet
-            println("❌ ERROR DE CONEXIÓN (Excepción): ${e.message}")
+            println("❌ ERROR CONEXIÓN: ${e.message}")
             e.printStackTrace()
             false
         }
