@@ -33,8 +33,6 @@ fun Nosotros() {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
-        // --- 1. ENCABEZADO SIMPLE (Logo y Título) ---
-        // Similar a tu pantalla de Inicio
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(top = 16.dp)
@@ -59,8 +57,6 @@ fun Nosotros() {
             )
         }
 
-        // --- 2. TARJETA DE MISIÓN (Estilo ServicioCard) ---
-        // Usamos ElevatedCard para mantener consistencia con la pantalla de Servicios
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -82,7 +78,6 @@ fun Nosotros() {
             }
         }
 
-        // --- 3. LISTA DE VALORES (Limpia) ---
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = "Por qué elegirnos",
@@ -91,7 +86,6 @@ fun Nosotros() {
                 modifier = Modifier.padding(start = 4.dp)
             )
 
-            // Reutilizamos un diseño de fila simple
             ValorItem(
                 icon = Icons.Outlined.Shield,
                 titulo = "Máxima Seguridad",
@@ -111,7 +105,6 @@ fun Nosotros() {
 
         Divider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        // --- 4. PIE DE PÁGINA (Contacto) ---
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "¿Necesitas ayuda?",
@@ -141,7 +134,6 @@ fun Nosotros() {
     }
 }
 
-// --- COMPONENTE REUTILIZABLE PEQUEÑO ---
 @Composable
 fun ValorItem(icon: ImageVector, titulo: String, desc: String) {
     Row(

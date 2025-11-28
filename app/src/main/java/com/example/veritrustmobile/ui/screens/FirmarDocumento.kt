@@ -30,12 +30,10 @@ fun FirmarDocumentoScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Variables de estado
     var uriOrigen by remember { mutableStateOf<Uri?>(null) }
     var mensaje by remember { mutableStateOf("") }
     var isProcesando by remember { mutableStateOf(false) }
 
-    // 1. LAUNCHER PARA GUARDAR EL ARCHIVO FIRMADO (Esto abre el menú "Guardar como" del celular)
     val guardadorLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/pdf")
     ) { uriDestino ->
@@ -43,7 +41,6 @@ fun FirmarDocumentoScreen() {
             isProcesando = true
             mensaje = "Firmando y guardando..."
 
-            // Ejecutamos la firma en segundo plano
             scope.launch(Dispatchers.IO) {
                 val exito = firmarYGuardar(context, uriOrigen!!, uriDestino)
 
@@ -60,7 +57,6 @@ fun FirmarDocumentoScreen() {
         }
     }
 
-    // 2. LAUNCHER PARA SELECCIONAR EL ARCHIVO ORIGINAL
     val selectorLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -90,24 +86,19 @@ fun FirmarDocumentoScreen() {
             textAlign = TextAlign.Center
         )
 
-        // Botón 1: Seleccionar
         Button(onClick = {
-            // Filtramos solo PDFs para evitar errores
             selectorLauncher.launch(arrayOf("application/pdf"))
         }) {
             Text("1. Seleccionar PDF Original")
         }
 
-        // Feedback visual de selección
         uriOrigen?.let {
             Text("Archivo cargado ✓", color = MaterialTheme.colorScheme.secondary)
         }
 
-        // Botón 2: Firmar y Guardar
         Button(
             enabled = (uriOrigen != null) && !isProcesando,
             onClick = {
-                // Sugerimos un nombre para el nuevo archivo
                 val nombreNuevo = "VeriTrust_Firmado_${System.currentTimeMillis()}.pdf"
                 guardadorLauncher.launch(nombreNuevo)
             }
@@ -132,31 +123,25 @@ fun FirmarDocumentoScreen() {
     }
 }
 
-// --- FUNCIÓN DE LÓGICA PURA PARA FIRMAR EL PDF ---
 fun firmarYGuardar(context: Context, inputUri: Uri, outputUri: Uri): Boolean {
     return try {
-        // A. Abrimos el PDF original
         val inputStream: InputStream? = context.contentResolver.openInputStream(inputUri)
         val documento = PDDocument.load(inputStream)
 
-        // B. Firmamos en la primera página
-        // Si el documento tiene páginas, tomamos la primera
         if (documento.numberOfPages > 0) {
             val page = documento.getPage(0)
 
-            // "AppendMode.APPEND" es clave para escribir SOBRE lo que ya existe
             val content = PDPageContentStream(documento, page, PDPageContentStream.AppendMode.APPEND, true, true)
 
             content.beginText()
             content.setFont(PDType1Font.HELVETICA_BOLD, 18f)
-            content.setNonStrokingColor(0, 128, 0) // Color verde
-            content.newLineAtOffset(50f, 100f) // Coordenadas (X, Y) desde abajo a la izquierda
+            content.setNonStrokingColor(0, 128, 0)
+            content.newLineAtOffset(50f, 100f)
             content.showText("FIRMADO DIGITALMENTE POR VERITRUST")
             content.endText()
             content.close()
         }
 
-        // C. Guardamos en el nuevo archivo (URI de destino)
         val outputStream = context.contentResolver.openOutputStream(outputUri)
         if (outputStream != null) {
             documento.save(outputStream)
@@ -165,10 +150,10 @@ fun firmarYGuardar(context: Context, inputUri: Uri, outputUri: Uri): Boolean {
 
         documento.close()
         inputStream?.close()
-        true // Todo salió bien
+        true
 
     } catch (e: Exception) {
         e.printStackTrace()
-        false // Hubo error
+        false
     }
 }

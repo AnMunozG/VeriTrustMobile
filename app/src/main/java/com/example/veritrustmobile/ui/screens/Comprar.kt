@@ -31,11 +31,10 @@ import java.util.Locale
 @Composable
 fun PantallaCompra(
     navController: NavController,
-    nombreServicio: String = "Servicio", // Valor por defecto
-    precioServicio: Int = 0,             // Valor por defecto
+    nombreServicio: String = "Servicio",
+    precioServicio: Int = 0,
     viewModel: CompraViewModel = viewModel()
 ) {
-    // 1. ESCUCHAR EVENTO DE ÉXITO PARA NAVEGAR A FIRMAR
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { success ->
             if (success) {

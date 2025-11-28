@@ -49,8 +49,7 @@ class AccederViewModel : ViewModel() {
                 val user = authRepository.login(email, password)
 
                 if (user != null) {
-                    // --- GUARDAR SESIÓN AQUÍ ---
-                    SessionManager.saveToken(user.user) // Usamos el email como token
+                    SessionManager.saveToken(user.user)
 
                     _navigationEvent.emit(NavigationEvent.NavigateToHome(user.user))
                 } else {

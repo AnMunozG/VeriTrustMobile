@@ -63,7 +63,6 @@ fun ServiciosScreen(
                 ShimmerLoadingCard()
             }
         } else {
-            // Nota: Quitamos key = { it.nombre } por seguridad si hay duplicados
             items(services) { servicio ->
                 AnimatedVisibility(
                     visible = true,

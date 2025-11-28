@@ -24,13 +24,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. INICIALIZAR SESSION MANAGER
         SessionManager.init(this)
 
-        // 2. INICIALIZAR LIBRERÍA PDF (OBLIGATORIO PARA QUE NO CRASHEE AL FIRMAR)
         PDFBoxResourceLoader.init(applicationContext)
 
-        // 3. CALCULAR RUTA INICIAL
         val startDestination = if (SessionManager.getToken() != null) {
             Rutas.Servicios.crearRuta(false)
         } else {
