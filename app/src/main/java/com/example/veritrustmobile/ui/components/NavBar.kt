@@ -33,6 +33,13 @@ fun NavBar(
             Text("Nosotros")
         }
 
+        TextButton(onClick = {
+            navController.navigate(Rutas.FirmarDocumento.ruta)
+            closeDrawer()
+        }) {
+            Text("Firmar Documento")
+        }
+
 
         Spacer(Modifier.weight(1f))
 

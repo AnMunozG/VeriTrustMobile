@@ -76,5 +76,8 @@ fun NavGraph(navController: NavHostController) {
         composable(Rutas.RecuperarContrasena.ruta){
             RecuperarContrasenaScreen(navController = navController)
         }
+        composable(Rutas.FirmarDocumento.ruta) {
+            FirmarDocumentoScreen()
+        }
     }
 }

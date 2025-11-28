@@ -12,6 +12,7 @@ sealed class Rutas(val rutaBase: String, val argumento: String? = null) {
     object RecuperarContrasena : Rutas("recuperar_contrasena")
     object Inicio : Rutas("inicio", "user")
     object Servicios : Rutas("servicios", "esInvitado")
+    object FirmarDocumento : Rutas("firmar_documento")
 
     fun crearRuta(valorArgumento: Any): String {
         return "$rutaBase/$valorArgumento"
