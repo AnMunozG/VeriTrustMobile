@@ -10,11 +10,10 @@ sealed class Rutas(val rutaBase: String, val argumento: String? = null) {
     object RecuperarContrasena : Rutas("recuperar_contrasena")
     object Inicio : Rutas("inicio", "user")
     object Servicios : Rutas("servicios", "esInvitado")
-
-    // RUTA NUEVA: Firmar Documento
     object FirmarDocumento : Rutas("firmar_documento")
 
-    // RUTA MODIFICADA: Ahora acepta nombre y precio
+    object Perfil : Rutas("perfil")
+
     object Comprar : Rutas("comprar/{nombreServicio}/{precioServicio}") {
         fun crearRuta(nombre: String, precio: Int): String {
             return "comprar/$nombre/$precio"

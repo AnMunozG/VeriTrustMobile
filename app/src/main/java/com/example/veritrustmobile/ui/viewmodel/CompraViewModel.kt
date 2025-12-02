@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class CompraViewModel : ViewModel() {
-
     var cardName by mutableStateOf(""); private set
     var cardNumber by mutableStateOf(""); private set
     var expirationMonth by mutableStateOf(""); private set
@@ -25,37 +24,14 @@ class CompraViewModel : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<Boolean>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    fun onCardNameChange(newName: String) {
-        cardName = newName
-    }
-
-    fun onCardNumberChange(newNumber: String) {
-        if (newNumber.length <= 16) {
-            cardNumber = newNumber.filter { it.isDigit() }
-        }
-    }
-
-    fun onExpirationMonthChange(newMonth: String) {
-        if (newMonth.length <= 2) {
-            expirationMonth = newMonth.filter { it.isDigit() }
-        }
-    }
-
-    fun onExpirationYearChange(newYear: String) {
-        if (newYear.length <= 4) {
-            expirationYear = newYear.filter { it.isDigit() }
-        }
-    }
-
-    fun onCvvChange(newCvv: String) {
-        if (newCvv.length <= 4) {
-            cvv = newCvv.filter { it.isDigit() }
-        }
-    }
+    fun onCardNameChange(v: String) { cardName = v }
+    fun onCardNumberChange(v: String) { if (v.length <= 16) cardNumber = v.filter { it.isDigit() } }
+    fun onExpirationMonthChange(v: String) { if (v.length <= 2) expirationMonth = v.filter { it.isDigit() } }
+    fun onExpirationYearChange(v: String) { if (v.length <= 4) expirationYear = v.filter { it.isDigit() } }
+    fun onCvvChange(v: String) { if (v.length <= 4) cvv = v.filter { it.isDigit() } }
 
     fun processPayment() {
         uiMessage = null
-
         if (cardName.isBlank()) { uiMessage = "El nombre es obligatorio."; return }
         if (!isCardNumberValid(cardNumber)) { uiMessage = "Número de tarjeta inválido."; return }
         if (!isExpirationMonthValid(expirationMonth)) { uiMessage = "Mes inválido."; return }
@@ -65,16 +41,12 @@ class CompraViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             delay(2000)
-
             uiMessage = "Pago realizado con éxito"
             isLoading = false
-
             _navigationEvent.emit(true)
-
             clearForm()
         }
     }
-
 
     private fun isCardNumberValid(number: String): Boolean {
         if (!number.matches(Regex("^\\d{16}$"))) return false
@@ -91,25 +63,8 @@ class CompraViewModel : ViewModel() {
         }
         return sum % 10 == 0
     }
-
-    private fun isExpirationMonthValid(month: String): Boolean {
-        return month.matches(Regex("^\\d{2}$")) && month.toIntOrNull() in 1..12
-    }
-
-    private fun isExpirationYearValid(year: String): Boolean {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        return year.matches(Regex("^\\d{4}$")) && (year.toIntOrNull() ?: 0) >= currentYear
-    }
-
-    private fun isCvvValid(cvv: String): Boolean {
-        return cvv.matches(Regex("^\\d{3,4}$"))
-    }
-
-    private fun clearForm() {
-        cardName = ""
-        cardNumber = ""
-        expirationMonth = ""
-        expirationYear = ""
-        cvv = ""
-    }
+    private fun isExpirationMonthValid(month: String): Boolean { return month.matches(Regex("^\\d{2}$")) && month.toIntOrNull() in 1..12 }
+    private fun isExpirationYearValid(year: String): Boolean { val currentYear = Calendar.getInstance().get(Calendar.YEAR); return year.matches(Regex("^\\d{4}$")) && (year.toIntOrNull() ?: 0) >= currentYear }
+    private fun isCvvValid(cvv: String): Boolean { return cvv.matches(Regex("^\\d{3,4}$")) }
+    private fun clearForm() { cardName = ""; cardNumber = ""; expirationMonth = ""; expirationYear = ""; cvv = "" }
 }

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.veritrustmobile.SessionManager // Importar el Manager
+import com.example.veritrustmobile.SessionManager
 import com.example.veritrustmobile.navigation.Rutas
 
 @Composable
@@ -19,6 +19,17 @@ fun NavBar(
             .fillMaxHeight()
             .padding(top = 64.dp, start = 16.dp)
     ) {
+        // --- 1. PERFIL (Primero en la lista) ---
+        TextButton(onClick = {
+            navController.navigate(Rutas.Perfil.ruta)
+            closeDrawer()
+        }) {
+            Text("Mi Perfil")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // --- 2. SERVICIOS ---
         TextButton(onClick = {
             navController.navigate(Rutas.Servicios.crearRuta(false))
             closeDrawer()
@@ -28,6 +39,7 @@ fun NavBar(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // --- 3. NOSOTROS ---
         TextButton(onClick = {
             navController.navigate(Rutas.Nosotros.ruta)
             closeDrawer()
@@ -35,14 +47,11 @@ fun NavBar(
             Text("Nosotros")
         }
 
-
         Spacer(Modifier.weight(1f))
 
+        // --- CERRAR SESIÓN ---
         TextButton(onClick = {
-            // 1. BORRAR SESIÓN
             SessionManager.clearSession()
-
-            // 2. IR AL LOGIN Y BORRAR HISTORIAL
             navController.navigate(Rutas.Acceder.ruta) {
                 popUpTo(0) { inclusive = true }
                 launchSingleTop = true
