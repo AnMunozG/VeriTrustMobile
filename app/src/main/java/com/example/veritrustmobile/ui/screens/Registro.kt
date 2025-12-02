@@ -31,11 +31,14 @@ fun RegistroScreen(
     navController: NavHostController,
     viewModel: RegistroViewModel = viewModel()
 ) {
+    // Escuchar eventos de navegación del ViewModel
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is RegistroViewModel.NavigationEvent.NavigateToLogin -> {
-                    navController.navigate(Rutas.Acceder.ruta) { popUpTo(navController.graph.startDestinationId) { inclusive = true } }
+                    navController.navigate(Rutas.Acceder.ruta) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
                 }
                 is RegistroViewModel.NavigationEvent.NavigateToValidarCarnet -> {
                     navController.navigate(Rutas.ValidarCarnet.ruta)
@@ -50,7 +53,7 @@ fun RegistroScreen(
 @Composable
 fun RegistroContent(viewModel: RegistroViewModel) {
 
-    // --- LÓGICA DATE PICKER ---
+    // --- LÓGICA DATE PICKER (FECHA) ---
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
 
@@ -60,6 +63,7 @@ fun RegistroContent(viewModel: RegistroViewModel) {
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
+                        // Formateamos la fecha a dd/MM/yyyy para enviar al backend
                         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         formatter.timeZone = TimeZone.getTimeZone("UTC")
                         viewModel.onFechaNacimientoChange(formatter.format(Date(millis)))
@@ -67,91 +71,249 @@ fun RegistroContent(viewModel: RegistroViewModel) {
                     showDatePicker = false
                 }) { Text("Aceptar") }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") } }
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+            }
         ) { DatePicker(state = datePickerState) }
     }
 
-    // --- LÓGICA DROPDOWN ---
+    // --- LÓGICA DROPDOWN (REGIÓN) ---
     var expandedDropdown by remember { mutableStateOf(false) }
     val regiones = listOf("Arica y Parinacota", "Antofagasta", "Atacama", "Coquimbo", "Valparaíso", "Metropolitana", "O'Higgins", "Maule", "Biobío", "Araucanía", "Los Ríos", "Los Lagos", "Aysén", "Magallanes")
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(24.dp).verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Crea tu cuenta", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        CampoDeTextoFormulario(valor = viewModel.rut, onValueChange = viewModel::onRutChange, etiqueta = "RUT (Ej: 12345678-9)", error = viewModel.errorRut)
-        CampoDeTextoFormulario(valor = viewModel.nombre, onValueChange = viewModel::onNombreChange, etiqueta = "Nombre completo", error = viewModel.errorNombre)
-
-        // DATE PICKER
-        OutlinedTextField(
-            value = viewModel.fechaNacimiento, onValueChange = {}, label = { Text("Fecha de Nacimiento") },
-            readOnly = true, trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.CalendarToday, null) } },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { showDatePicker = true }, enabled = false,
-            colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant),
-            shape = RoundedCornerShape(12.dp), isError = viewModel.errorFechaNacimiento != null,
-            supportingText = { if (viewModel.errorFechaNacimiento != null) Text(text = viewModel.errorFechaNacimiento!!, color = MaterialTheme.colorScheme.error) }
+        Text(
+            text = "Crea tu cuenta",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
         )
 
-        CampoDeTextoFormulario(valor = viewModel.telefono, onValueChange = viewModel::onTelefonoChange, etiqueta = "Teléfono", error = viewModel.errorTelefono, tipoDeTeclado = KeyboardType.Phone)
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // DROPDOWN
+        // RUT
+        CampoDeTextoFormulario(
+            valor = viewModel.rut,
+            onValueChange = viewModel::onRutChange,
+            etiqueta = "RUT (Ej: 12345678-9)",
+            error = viewModel.errorRut
+        )
+        // NOMBRE
+        CampoDeTextoFormulario(
+            valor = viewModel.nombre,
+            onValueChange = viewModel::onNombreChange,
+            etiqueta = "Nombre completo",
+            error = viewModel.errorNombre
+        )
+
+        // --- 1. FECHA DE NACIMIENTO (Campo ReadOnly + Icono Calendario) ---
+        OutlinedTextField(
+            value = viewModel.fechaNacimiento,
+            onValueChange = {},
+            label = { Text("Fecha de Nacimiento") },
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Default.CalendarToday, contentDescription = null)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+                .clickable { showDatePicker = true }, // Click en todo el campo abre el selector
+            enabled = false, // Deshabilitar teclado, pero mantener evento click en modifier
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            shape = RoundedCornerShape(12.dp),
+            isError = viewModel.errorFechaNacimiento != null,
+            supportingText = {
+                if (viewModel.errorFechaNacimiento != null) {
+                    Text(text = viewModel.errorFechaNacimiento!!, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        )
+
+        // TELÉFONO
+        CampoDeTextoFormulario(
+            valor = viewModel.telefono,
+            onValueChange = viewModel::onTelefonoChange,
+            etiqueta = "Teléfono",
+            error = viewModel.errorTelefono,
+            tipoDeTeclado = KeyboardType.Phone
+        )
+
+        // --- 2. LISTA DE VALORES (DROPDOWN - REGIÓN) ---
         ExposedDropdownMenuBox(
-            expanded = expandedDropdown, onExpandedChange = { expandedDropdown = it }, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            expanded = expandedDropdown,
+            onExpandedChange = { expandedDropdown = it },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
         ) {
             OutlinedTextField(
-                value = viewModel.region, onValueChange = {}, readOnly = true, label = { Text("Región") },
+                value = viewModel.region,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Región") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(), shape = RoundedCornerShape(12.dp), isError = viewModel.errorRegion != null,
-                supportingText = { if (viewModel.errorRegion != null) Text(text = viewModel.errorRegion!!, color = MaterialTheme.colorScheme.error) }
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                isError = viewModel.errorRegion != null,
+                supportingText = {
+                    if (viewModel.errorRegion != null) Text(text = viewModel.errorRegion!!, color = MaterialTheme.colorScheme.error)
+                }
             )
-            ExposedDropdownMenu(expanded = expandedDropdown, onDismissRequest = { expandedDropdown = false }) {
+            ExposedDropdownMenu(
+                expanded = expandedDropdown,
+                onDismissRequest = { expandedDropdown = false }
+            ) {
                 regiones.forEach { region ->
-                    DropdownMenuItem(text = { Text(region) }, onClick = { viewModel.onRegionChange(region); expandedDropdown = false })
+                    DropdownMenuItem(
+                        text = { Text(region) },
+                        onClick = {
+                            viewModel.onRegionChange(region)
+                            expandedDropdown = false
+                        }
+                    )
                 }
             }
         }
 
-        // RADIO BUTTON
+        // --- 3. RADIO BUTTONS (GÉNERO) ---
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-            Text("Género", style = MaterialTheme.typography.bodyMedium)
+            Text("Género", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = viewModel.genero == "Masculino", onClick = { viewModel.onGeneroChange("Masculino") })
+                RadioButton(
+                    selected = viewModel.genero == "Masculino",
+                    onClick = { viewModel.onGeneroChange("Masculino") }
+                )
                 Text("Masculino", modifier = Modifier.clickable { viewModel.onGeneroChange("Masculino") })
+
                 Spacer(modifier = Modifier.width(16.dp))
-                RadioButton(selected = viewModel.genero == "Femenino", onClick = { viewModel.onGeneroChange("Femenino") })
+
+                RadioButton(
+                    selected = viewModel.genero == "Femenino",
+                    onClick = { viewModel.onGeneroChange("Femenino") }
+                )
                 Text("Femenino", modifier = Modifier.clickable { viewModel.onGeneroChange("Femenino") })
             }
-            if (viewModel.errorGenero != null) Text(text = viewModel.errorGenero!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+            if (viewModel.errorGenero != null) {
+                Text(text = viewModel.errorGenero!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+            }
         }
 
-        CampoDeTextoFormulario(valor = viewModel.email, onValueChange = viewModel::onEmailChange, etiqueta = "Correo electrónico", error = viewModel.errorEmail, tipoDeTeclado = KeyboardType.Email)
-        CampoDeTextoFormulario(valor = viewModel.confirmarEmail, onValueChange = viewModel::onConfirmarEmailChange, etiqueta = "Confirma tu correo", error = viewModel.errorConfirmarEmail, tipoDeTeclado = KeyboardType.Email)
-        CampoDeTextoFormulario(valor = viewModel.contrasena, onValueChange = viewModel::onContrasenaChange, etiqueta = "Contraseña", error = viewModel.errorContrasena, esContrasena = true, tipoDeTeclado = KeyboardType.Password)
-        CampoDeTextoFormulario(valor = viewModel.confirmarContrasena, onValueChange = viewModel::onConfirmarContrasenaChange, etiqueta = "Confirma contraseña", error = viewModel.errorConfirmarContrasena, esContrasena = true, tipoDeTeclado = KeyboardType.Password)
+        // EMAIL Y PASSWORD
+        CampoDeTextoFormulario(
+            valor = viewModel.email,
+            onValueChange = viewModel::onEmailChange,
+            etiqueta = "Correo electrónico",
+            error = viewModel.errorEmail,
+            tipoDeTeclado = KeyboardType.Email
+        )
+        CampoDeTextoFormulario(
+            valor = viewModel.confirmarEmail,
+            onValueChange = viewModel::onConfirmarEmailChange,
+            etiqueta = "Confirma tu correo",
+            error = viewModel.errorConfirmarEmail,
+            tipoDeTeclado = KeyboardType.Email
+        )
+        CampoDeTextoFormulario(
+            valor = viewModel.contrasena,
+            onValueChange = viewModel::onContrasenaChange,
+            etiqueta = "Contraseña",
+            error = viewModel.errorContrasena,
+            esContrasena = true,
+            tipoDeTeclado = KeyboardType.Password
+        )
+        CampoDeTextoFormulario(
+            valor = viewModel.confirmarContrasena,
+            onValueChange = viewModel::onConfirmarContrasenaChange,
+            etiqueta = "Confirma contraseña",
+            error = viewModel.errorConfirmarContrasena,
+            esContrasena = true,
+            tipoDeTeclado = KeyboardType.Password
+        )
 
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { viewModel.onTerminosChange(!viewModel.terminosAceptados) }, verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = viewModel.terminosAceptados, onCheckedChange = { viewModel.onTerminosChange(it) })
-            Text(text = "Acepto los términos y condiciones", style = MaterialTheme.typography.bodyMedium)
+        // CHECKBOX TÉRMINOS
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .clickable { viewModel.onTerminosChange(!viewModel.terminosAceptados) },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = viewModel.terminosAceptados,
+                onCheckedChange = { viewModel.onTerminosChange(it) }
+            )
+            Text(
+                text = "Acepto los términos y condiciones",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
-        viewModel.errorTerminos?.let { Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall, modifier = Modifier.fillMaxWidth().padding(start = 16.dp)) }
+        viewModel.errorTerminos?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = viewModel::onRegistroSubmit, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(25.dp)) { Text("Continuar") }
+
+        // BOTÓN CONTINUAR
+        Button(
+            onClick = viewModel::onRegistroSubmit,
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(25.dp)
+        ) {
+            Text("Continuar")
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
+// COMPONENTE AUXILIAR PARA LOS TEXT FIELDS
 @Composable
-private fun CampoDeTextoFormulario(valor: String, onValueChange: (String) -> Unit, etiqueta: String, modifier: Modifier = Modifier, error: String? = null, esContrasena: Boolean = false, tipoDeTeclado: KeyboardType = KeyboardType.Text) {
+private fun CampoDeTextoFormulario(
+    valor: String,
+    onValueChange: (String) -> Unit,
+    etiqueta: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    esContrasena: Boolean = false,
+    tipoDeTeclado: KeyboardType = KeyboardType.Text
+) {
     Column(modifier = modifier.padding(bottom = 8.dp)) {
         OutlinedTextField(
-            value = valor, onValueChange = onValueChange, label = { Text(etiqueta) }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            value = valor,
+            onValueChange = onValueChange,
+            label = { Text(etiqueta) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = if (esContrasena) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = tipoDeTeclado), isError = error != null, shape = RoundedCornerShape(12.dp),
-            supportingText = { if (error != null) Text(text = error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall) }
+            keyboardOptions = KeyboardOptions(keyboardType = tipoDeTeclado),
+            isError = error != null,
+            shape = RoundedCornerShape(12.dp),
+            supportingText = {
+                if (error != null) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
         )
     }
 }
