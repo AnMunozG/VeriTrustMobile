@@ -75,6 +75,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.3.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("io.mockk:mockk:1.13.5")
 
     // Kotest (Para aserciones legibles "shouldBe")
     testImplementation("io.kotest:kotest-assertions-core:5.6.2")

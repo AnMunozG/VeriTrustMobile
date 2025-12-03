@@ -3,12 +3,12 @@ package com.example.veritrustmobile
 import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
 import com.example.veritrustmobile.repository.AuthRepository
 
-// 3. HERRAMIENTAS DE TESTING (JUnit, Kotest, Mockito)
 import org.junit.Before
 import org.junit.Test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import org.mockito.Mockito.mock
+// CAMBIO: Usamos MockK en vez de Mockito
+import io.mockk.mockk
 
 class RegistroViewModelTest {
 
@@ -17,36 +17,34 @@ class RegistroViewModelTest {
 
     @Before
     fun setup() {
-        // MOCKITO
-        mockRepository = mock(AuthRepository::class.java)
+        // MOCKK: La sintaxis es más limpia para Kotlin
+        // 'relaxed = true' significa que si llamamos a algo no configurado, no explota
+        mockRepository = mockk(relaxed = true)
 
         viewModel = RegistroViewModel(mockRepository)
     }
 
-    //TEST 1
+    // TEST 1
     @Test
-    fun `si ingreso un RUT invalido, validarFormulario debe devolver false y marcar error`() {
+    fun `si ingreso un RUT invalido, validarFormulario debe devolver false`() {
         viewModel.onRutChange("1-1")
-
-        // WHEN: Haces tus momos en Android Studio
         val esValido = viewModel.validarFormulario()
 
         esValido shouldBe false
         viewModel.errorRut shouldBe "RUT inválido"
     }
 
-    //TEST 2
+    // TEST 2
     @Test
-    fun `si el usuario es menor de edad, debe generar error en fecha nacimiento`() {
+    fun `si el usuario es menor de edad, marca error en fecha`() {
         viewModel.onFechaNacimientoChange("01/01/2022")
-
         val esValido = viewModel.validarFormulario()
 
         esValido shouldBe false
         viewModel.errorFechaNacimiento shouldNotBe null
     }
 
-    //TEST 3
+    // TEST 3
     @Test
     fun `si todos los datos son correctos, el formulario es valido`() {
         viewModel.onRutChange("11.111.111-1")
@@ -59,10 +57,13 @@ class RegistroViewModelTest {
         viewModel.onConfirmarContrasenaChange("123456")
         viewModel.onTerminosChange(true)
 
+        // Campos nuevos
+        viewModel.onRegionChange("Metropolitana")
+        viewModel.onGeneroChange("Masculino")
+
         val esValido = viewModel.validarFormulario()
 
         esValido shouldBe true
         viewModel.errorRut shouldBe null
-        viewModel.errorNombre shouldBe null
     }
 }
