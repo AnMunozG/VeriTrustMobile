@@ -1,5 +1,6 @@
 package com.example.veritrustmobile.data
 
+import com.example.veritrustmobile.model.Documento
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.model.User
 import retrofit2.Response
@@ -28,4 +29,7 @@ interface ApiService {
 
     @DELETE("usuarios/{email}")
     suspend fun eliminarUsuario(@Path("email") email: String): Response<Void>
+
+    @POST("documentos")
+    suspend fun guardarDocumento(@Body documento: Documento): Response<Documento>
 }

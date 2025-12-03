@@ -26,12 +26,13 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        // ANIMACIONES GLOBALES (Punto 37)
+        // ANIMACIONES GLOBALES (Transiciones suaves)
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) + fadeOut() },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) + fadeIn() },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }, animationSpec = tween(500)) + fadeOut() }
     ) {
+        // INICIO
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
@@ -42,6 +43,7 @@ fun NavGraph(
             Inicio(navController = navController, user = user)
         }
 
+        // SERVICIOS
         composable(
             route = Rutas.Servicios.ruta,
             arguments = listOf(navArgument("esInvitado") { type = NavType.BoolType })
@@ -51,6 +53,7 @@ fun NavGraph(
             ServiciosScreen(navController = navController, esInvitado = esInvitado, viewModel = serviciosViewModel)
         }
 
+        // COMPRAR (Con argumentos)
         composable(
             route = "comprar/{nombreServicio}/{precioServicio}",
             arguments = listOf(
@@ -63,14 +66,23 @@ fun NavGraph(
             PantallaCompra(navController = navController, nombreServicio = nombre, precioServicio = precio)
         }
 
-        composable(Rutas.FirmarDocumento.ruta) { FirmarDocumentoScreen() }
+        // FIRMAR DOCUMENTO (Pasamos navController para el botón "Volver")
+        composable(Rutas.FirmarDocumento.ruta) {
+            FirmarDocumentoScreen(navController = navController)
+        }
+
+        // PERFIL (Nueva ruta)
+        composable(Rutas.Perfil.ruta) {
+            PerfilScreen(navController = navController)
+        }
+
+        // OTRAS PANTALLAS
         composable(Rutas.Nosotros.ruta) { Nosotros() }
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
-        composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }
-        composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController, viewModel = registroViewModel) }
         composable(Rutas.RecuperarContrasena.ruta){ RecuperarContrasenaScreen(navController = navController) }
 
-        // PANTALLA NUEVA
-        composable(Rutas.Perfil.ruta) { PerfilScreen(navController = navController) }
+        // REGISTRO Y VALIDACIÓN (Comparten ViewModel)
+        composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }
+        composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController, viewModel = registroViewModel) }
     }
 }
