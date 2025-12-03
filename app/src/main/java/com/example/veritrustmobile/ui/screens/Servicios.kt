@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,6 +30,7 @@ import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
+import com.example.veritrustmobile.ui.viewmodel.UiState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material3.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -42,48 +44,70 @@ fun ServiciosScreen(
     esInvitado: Boolean,
     viewModel: ServiciosViewModel = viewModel()
 ) {
-    val services by viewModel.servicesState.collectAsState()
-    val isLoading = services.isEmpty()
+    val uiState by viewModel.servicesState.collectAsState()
 
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Text(
-                text = "Podemos ayudar a que tu negocio crezca",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 16.dp),
-                fontWeight = FontWeight.Bold
-            )
-        }
+    Column {
+        Text(
+            text = "Podemos ayudar a que tu negocio crezca",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
+            fontWeight = FontWeight.Bold
+        )
 
-        if (isLoading) {
-            items(3) {
-                ShimmerLoadingCard()
-            }
-        } else {
-            items(services) { servicio ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                            slideInVertically(
-                                initialOffsetY = { it / 2 },
-                                animationSpec = tween(durationMillis = 500)
-                            )
+        when (val state = uiState) {
+            is UiState.Loading -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    ServicioCard(
-                        servicio = servicio,
-                        onComprarClick = {
-                            // AQUÍ PASAMOS LOS DATOS A LA PANTALLA DE COMPRA
-                            val rutaCompra = Rutas.Comprar.crearRuta(
-                                nombre = servicio.nombre,
-                                // Convertimos el precio a Int (si es Double en tu modelo)
-                                precio = servicio.precio.toInt()
-                            )
-                            navController.navigate(rutaCompra)
-                        },
-                        esInvitado = esInvitado
+                    items(3) {
+                        ShimmerLoadingCard()
+                    }
+                }
+            }
+            is UiState.Success -> {
+                val services = state.data
+                if (services.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No hay servicios disponibles en este momento.")
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(services, key = { it.id ?: -1 }) { servicio ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            initialOffsetY = { it / 2 },
+                                            animationSpec = tween(durationMillis = 500)
+                                        )
+                            ) {
+                                ServicioCard(
+                                    servicio = servicio,
+                                    onComprarClick = {
+                                        val rutaCompra = Rutas.Comprar.crearRuta(
+                                            nombre = servicio.nombre,
+                                            precio = servicio.precio
+                                        )
+                                        navController.navigate(rutaCompra)
+                                    },
+                                    esInvitado = esInvitado
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            is UiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }
@@ -187,7 +211,17 @@ fun ShimmerLoadingCard() {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
-            Spacer(modifier = Modifier.height(120.dp))
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp))
         }
     }
 }
@@ -201,3 +235,4 @@ fun ServiciosScreenPreview() {
         }
     }
 }
+

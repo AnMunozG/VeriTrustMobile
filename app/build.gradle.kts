@@ -57,6 +57,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.compose)
+
+    // SOLUCIÓN: Se elimina la siguiente línea que causa el error y no se utiliza.
+    // implementation(libs.firebase.firestore.ktx)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -28,10 +28,9 @@ fun PerfilScreen(
     navController: NavController,
     viewModel: PerfilViewModel = viewModel()
 ) {
-    // Estado local para controlar el cuadro de diálogo de eliminación
+
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
-    // EFECTO: Si el ViewModel reporta que la cuenta fue eliminada, navegamos al Login
     LaunchedEffect(viewModel.cuentaEliminada) {
         if (viewModel.cuentaEliminada) {
             navController.navigate(Rutas.Acceder.ruta) {
@@ -41,7 +40,6 @@ fun PerfilScreen(
         }
     }
 
-    // --- DIÁLOGO DE CONFIRMACIÓN (Alerta) ---
     if (mostrarDialogoEliminar) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoEliminar = false },
@@ -52,7 +50,7 @@ fun PerfilScreen(
                 Button(
                     onClick = {
                         mostrarDialogoEliminar = false
-                        viewModel.eliminarPerfil() // Llamada al ViewModel para borrar en Backend
+                        viewModel.eliminarPerfil()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -77,12 +75,12 @@ fun PerfilScreen(
                     }
                 },
                 actions = {
-                    // BOTÓN PRINCIPAL DE ACCIÓN (Editar / Guardar)
+
                     IconButton(onClick = {
                         if (viewModel.isEditing) {
-                            viewModel.guardarCambios() // Si está editando, Guarda
+                            viewModel.guardarCambios()
                         } else {
-                            viewModel.toggleEdit() // Si está leyendo, Activa edición
+                            viewModel.toggleEdit()
                         }
                     }) {
                         Icon(
@@ -92,7 +90,7 @@ fun PerfilScreen(
                         )
                     }
 
-                    // BOTÓN DE CANCELAR (Solo visible si se está editando)
+
                     if (viewModel.isEditing) {
                         IconButton(onClick = { viewModel.toggleEdit() }) {
                             Icon(Icons.Default.Close, contentDescription = "Cancelar edición", tint = MaterialTheme.colorScheme.error)
@@ -104,7 +102,7 @@ fun PerfilScreen(
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
 
-            // Si está cargando datos del backend, mostramos spinner
+
             if (viewModel.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
@@ -130,14 +128,14 @@ fun PerfilScreen(
                         color = if (viewModel.isEditing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
 
-                    // --- CAMPOS DE DATOS (Conectados al ViewModel) ---
 
-                    // 1. CAMPOS DE SOLO LECTURA (Inmutables por seguridad/lógica)
+
+
                     CampoPerfil(label = "RUT", valor = viewModel.rut, enabled = false)
                     CampoPerfil(label = "Correo Electrónico", valor = viewModel.email, enabled = false)
                     CampoPerfil(label = "Fecha de Nacimiento", valor = viewModel.fechaNacimiento, enabled = false)
 
-                    // 2. CAMPOS EDITABLES (Se habilitan con isEditing)
+
                     CampoPerfil(
                         label = "Nombre Completo",
                         valor = viewModel.nombre,
@@ -159,26 +157,23 @@ fun PerfilScreen(
                         onValueChange = viewModel::onRegionChange
                     )
 
-                    // Género (Lo dejamos editable como texto simple para no complicar con RadioButtons aquí)
                     CampoPerfil(
                         label = "Género",
                         valor = viewModel.genero,
                         enabled = viewModel.isEditing,
-                        // Si quisieras bloquearlo, cambia enabled a false
                     )
 
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
 
                     Text("Seguridad", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
 
-                    // 3. CAMBIO DE CONTRASEÑA
                     OutlinedTextField(
                         value = viewModel.password,
                         onValueChange = viewModel::onPasswordChange,
                         label = { Text(if (viewModel.isEditing) "Nueva Contraseña (Opcional)" else "Contraseña") },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = viewModel.isEditing, // Solo se puede escribir si se apretó el lápiz
-                        visualTransformation = PasswordVisualTransformation(), // Oculta caracteres
+                        enabled = viewModel.isEditing,
+                        visualTransformation = PasswordVisualTransformation(),
                         placeholder = { Text("Dejar en blanco para mantener la actual") },
                         colors = OutlinedTextFieldDefaults.colors(
                             disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -187,7 +182,7 @@ fun PerfilScreen(
                         )
                     )
 
-                    // MENSAJES DE FEEDBACK (Éxito o Error)
+
                     viewModel.mensaje?.let {
                         Card(
                             colors = CardDefaults.cardColors(
@@ -206,7 +201,7 @@ fun PerfilScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // --- ZONA DE PELIGRO: ELIMINAR CUENTA ---
-                    if (!viewModel.isEditing) { // Solo mostramos eliminar si no estamos editando, para evitar clicks accidentales
+                    if (!viewModel.isEditing) {
                         Divider()
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -229,7 +224,6 @@ fun PerfilScreen(
     }
 }
 
-// COMPONENTE REUTILIZABLE PARA LOS CAMPOS DE TEXTO
 @Composable
 fun CampoPerfil(
     label: String,

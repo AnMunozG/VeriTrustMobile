@@ -32,4 +32,14 @@ interface ApiService {
 
     @POST("documentos")
     suspend fun guardarDocumento(@Body documento: Documento): Response<Documento>
+
+    @POST("servicios")
+    suspend fun crearServicio(@Body servicio: Servicio): Response<Servicio>
+
+    @PUT("servicios/{id}")
+    suspend fun actualizarServicio(@Path("id") id: String, @Body servicio: Servicio): Response<Servicio>
+
+    @DELETE("servicios/{id}")
+    suspend fun eliminarServicio(@Path("id") id: String): Response<Unit>
+
 }

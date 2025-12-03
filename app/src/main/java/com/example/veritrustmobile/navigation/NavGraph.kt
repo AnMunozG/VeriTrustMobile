@@ -80,6 +80,7 @@ fun NavGraph(
         composable(Rutas.Nosotros.ruta) { Nosotros() }
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
         composable(Rutas.RecuperarContrasena.ruta){ RecuperarContrasenaScreen(navController = navController) }
+        composable(Rutas.BackOffice.ruta) { BackOfficeScreen(navController = navController) }
 
         // REGISTRO Y VALIDACIÓN (Comparten ViewModel)
         composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }

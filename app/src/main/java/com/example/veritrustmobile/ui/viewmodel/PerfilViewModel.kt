@@ -12,36 +12,30 @@ import kotlinx.coroutines.launch
 
 class PerfilViewModel : ViewModel() {
 
-    // --- ESTADOS DE LOS DATOS DEL USUARIO ---
     var nombre by mutableStateOf("")
     var rut by mutableStateOf("")
-    var email by mutableStateOf("") // Actúa como ID
+    var email by mutableStateOf("")
     var telefono by mutableStateOf("")
     var fechaNacimiento by mutableStateOf("")
     var region by mutableStateOf("")
     var genero by mutableStateOf("")
 
-    // Contraseña: Se mantiene separada. Si se deja vacía al guardar, no se cambia.
     var password by mutableStateOf("")
 
-    // --- ESTADOS DE LA INTERFAZ ---
-    var isEditing by mutableStateOf(false) // ¿Están los campos desbloqueados?
-    var isLoading by mutableStateOf(false) // Spinner de carga
-    var mensaje by mutableStateOf<String?>(null) // Feedback para el usuario (Toasts/Snackbars)
+    var isEditing by mutableStateOf(false)
+    var isLoading by mutableStateOf(false)
+    var mensaje by mutableStateOf<String?>(null)
 
     // Estado crítico: Indica a la vista si la cuenta fue borrada para navegar al Login
     var cuentaEliminada by mutableStateOf(false)
 
-    // Al iniciar el ViewModel, cargamos los datos automáticamente
     init {
         cargarDatosUsuario()
     }
 
-    // Alternar entre modo Lectura y Edición
     fun toggleEdit() {
         if (isEditing) {
             // Si estaba editando y cancela (vuelve a tocar el botón sin guardar),
-            // recargamos los datos originales para deshacer cambios no guardados.
             cargarDatosUsuario()
         }
         isEditing = !isEditing
@@ -50,7 +44,7 @@ class PerfilViewModel : ViewModel() {
 
     // 1. CARGAR (READ)
     private fun cargarDatosUsuario() {
-        val emailGuardado = SessionManager.getToken() // Obtenemos el email de la sesión local
+        val emailGuardado = SessionManager.getToken()
 
         if (emailGuardado.isNullOrEmpty()) {
             mensaje = "No hay sesión activa"
@@ -60,13 +54,11 @@ class PerfilViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                // Llamada GET al backend
                 val response = RetrofitClient.api.getUsuario(emailGuardado)
 
                 if (response.isSuccessful) {
                     val user = response.body()
                     user?.let {
-                        // Llenamos los estados con datos reales del servidor
                         nombre = it.nombre
                         rut = it.rut
                         email = it.user
@@ -74,7 +66,7 @@ class PerfilViewModel : ViewModel() {
                         fechaNacimiento = it.fechaNacimiento
                         region = it.region
                         genero = it.genero
-                        password = "" // Por seguridad, siempre limpiamos la contraseña visual
+                        password = ""
                     }
                 } else {
                     mensaje = "Error al cargar perfil. Código: ${response.code()}"
@@ -93,7 +85,6 @@ class PerfilViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                // Preparamos el objeto Usuario con los datos editados
                 // Si password está vacía, el Backend está configurado para ignorarla y mantener la anterior
                 val usuarioActualizado = User(
                     user = email, // El email no se debe cambiar aquí
@@ -110,8 +101,8 @@ class PerfilViewModel : ViewModel() {
 
                 if (response.isSuccessful) {
                     mensaje = "Datos actualizados correctamente"
-                    isEditing = false // Volvemos a bloquear los campos (modo lectura)
-                    password = "" // Limpiamos el campo de contraseña
+                    isEditing = false
+                    password = ""
                 } else {
                     mensaje = "Error al actualizar. Verifique los datos."
                 }
@@ -132,10 +123,9 @@ class PerfilViewModel : ViewModel() {
             try {
                 val response = RetrofitClient.api.eliminarUsuario(emailGuardado)
 
-                // El backend devuelve 204 No Content o 200 OK si tuvo éxito
                 if (response.isSuccessful) {
-                    SessionManager.clearSession() // Borramos sesión local en el teléfono
-                    cuentaEliminada = true // Disparamos la navegación hacia el Login
+                    SessionManager.clearSession()
+                    cuentaEliminada = true
                 } else {
                     mensaje = "No se pudo eliminar la cuenta. Intente más tarde."
                 }
@@ -147,7 +137,6 @@ class PerfilViewModel : ViewModel() {
         }
     }
 
-    // --- SETTERS PARA LA UI (Data Binding) ---
     fun onNombreChange(v: String) { nombre = v }
     fun onTelefonoChange(v: String) { telefono = v }
     fun onRegionChange(v: String) { region = v }
