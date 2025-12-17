@@ -1,5 +1,6 @@
 package com.example.veritrustmobile.ui.screens
 
+import android.app.Application
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,17 +13,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -41,9 +43,17 @@ import java.util.Locale
 @Composable
 fun ServiciosScreen(
     navController: NavHostController,
-    esInvitado: Boolean,
-    viewModel: ServiciosViewModel = viewModel()
+    esInvitado: Boolean
 ) {
+    val context = LocalContext.current.applicationContext as Application
+    val viewModel: ServiciosViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return ServiciosViewModel(context) as T
+            }
+        }
+    )
+
     val uiState by viewModel.servicesState.collectAsState()
 
     Column {
@@ -235,4 +245,3 @@ fun ServiciosScreenPreview() {
         }
     }
 }
-

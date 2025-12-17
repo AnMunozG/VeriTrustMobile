@@ -1,7 +1,9 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.veritrustmobile.data.local.AppDatabase
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.repository.ServicesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +16,10 @@ sealed class UiState {
     data class Error(val message: String) : UiState()
 }
 
-class ServiciosViewModel : ViewModel() {
+class ServiciosViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val servicesRepository = ServicesRepository()
+    private val database = AppDatabase.getDatabase(application)
+    private val servicesRepository = ServicesRepository(database.servicioDao())
 
     private val _servicesState = MutableStateFlow<UiState>(UiState.Loading)
     val servicesState = _servicesState.asStateFlow()
@@ -25,7 +28,7 @@ class ServiciosViewModel : ViewModel() {
         loadServices()
     }
 
-    private fun loadServices() {
+    fun loadServices() {
         viewModelScope.launch {
             _servicesState.value = UiState.Loading
             try {

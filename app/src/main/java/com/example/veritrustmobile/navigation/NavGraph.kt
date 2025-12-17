@@ -14,7 +14,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.veritrustmobile.ui.screens.*
 import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
-import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
 fun NavGraph(
@@ -26,7 +25,7 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        // ANIMACIONES GLOBALES (Transiciones suaves)
+        // ANIMACIONES GLOBALES
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) + fadeOut() },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) + fadeIn() },
@@ -49,11 +48,11 @@ fun NavGraph(
             arguments = listOf(navArgument("esInvitado") { type = NavType.BoolType })
         ) { backStackEntry ->
             val esInvitado = backStackEntry.arguments?.getBoolean("esInvitado") ?: true
-            val serviciosViewModel: ServiciosViewModel = viewModel()
-            ServiciosScreen(navController = navController, esInvitado = esInvitado, viewModel = serviciosViewModel)
+            // Eliminamos la creación manual del viewModel aquí, ServiciosScreen ya lo hace
+            ServiciosScreen(navController = navController, esInvitado = esInvitado)
         }
 
-        // COMPRAR (Con argumentos)
+        // COMPRAR
         composable(
             route = "comprar/{nombreServicio}/{precioServicio}",
             arguments = listOf(
@@ -66,12 +65,12 @@ fun NavGraph(
             PantallaCompra(navController = navController, nombreServicio = nombre, precioServicio = precio)
         }
 
-        // FIRMAR DOCUMENTO (Pasamos navController para el botón "Volver")
+        // FIRMAR DOCUMENTO
         composable(Rutas.FirmarDocumento.ruta) {
             FirmarDocumentoScreen(navController = navController)
         }
 
-        // PERFIL (Nueva ruta)
+        // PERFIL
         composable(Rutas.Perfil.ruta) {
             PerfilScreen(navController = navController)
         }
