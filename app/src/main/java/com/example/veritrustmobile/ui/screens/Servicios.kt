@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.veritrustmobile.SessionManager
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
@@ -41,10 +42,12 @@ import java.util.Locale
 @Composable
 fun ServiciosScreen(
     navController: NavHostController,
-    esInvitado: Boolean,
     viewModel: ServiciosViewModel = viewModel()
 ) {
     val uiState by viewModel.servicesState.collectAsState()
+
+    val rol = SessionManager.getRol()
+    val esInvitado = (rol == "invitado")
 
     Column {
         Text(
@@ -88,11 +91,17 @@ fun ServiciosScreen(
                                 ServicioCard(
                                     servicio = servicio,
                                     onComprarClick = {
-                                        val rutaCompra = Rutas.Comprar.crearRuta(
-                                            nombre = servicio.nombre,
-                                            precio = servicio.precio
-                                        )
-                                        navController.navigate(rutaCompra)
+                                        if (esInvitado) {
+                                            // Si es invitado, mandarlo a acceder
+                                            navController.navigate(Rutas.Acceder.ruta)
+                                        } else {
+                                            // Si está logueado, permitir compra
+                                            val rutaCompra = Rutas.Comprar.crearRuta(
+                                                nombre = servicio.nombre,
+                                                precio = servicio.precio
+                                            )
+                                            navController.navigate(rutaCompra)
+                                        }
                                     },
                                     esInvitado = esInvitado
                                 )
@@ -188,10 +197,12 @@ fun ServicioCard(
             Button(
                 onClick = onComprarClick,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !esInvitado,
                 contentPadding = PaddingValues(vertical = 12.dp)
             ) {
-                Text("Comprar", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = if (esInvitado) "Inicia sesión para comprar" else "Comprar",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
@@ -231,7 +242,7 @@ fun ShimmerLoadingCard() {
 fun ServiciosScreenPreview() {
     VeriTrustMobileTheme(dynamicColor = false) {
         Surface {
-            ServiciosScreen(rememberNavController(), esInvitado = true)
+            ServiciosScreen(rememberNavController())
         }
     }
 }

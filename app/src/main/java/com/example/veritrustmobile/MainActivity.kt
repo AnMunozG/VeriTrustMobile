@@ -25,13 +25,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         SessionManager.init(this)
-
         PDFBoxResourceLoader.init(applicationContext)
 
         val startDestination = if (SessionManager.getToken() != null) {
-            Rutas.Servicios.crearRuta(false)
+            Rutas.Servicios.ruta // Usuario logueado va directo a Servicios
         } else {
-            Rutas.Inicio.ruta
+            Rutas.Inicio.ruta // Sin sesión
         }
 
         enableEdgeToEdge()

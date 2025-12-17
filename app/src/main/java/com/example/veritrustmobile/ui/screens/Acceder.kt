@@ -51,7 +51,7 @@ fun Acceder(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is AccederViewModel.NavigationEvent.NavigateToHome -> {
-                    navController.navigate(Rutas.Servicios.crearRuta(valorArgumento = false)) {
+                    navController.navigate(Rutas.Servicios.ruta) {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }

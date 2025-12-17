@@ -50,6 +50,7 @@ class AccederViewModel : ViewModel() {
 
                 if (user != null) {
                     SessionManager.saveToken(user.user)
+                    SessionManager.saveRol(user.rol) // ⭐ GUARDAR ROL
 
                     _navigationEvent.emit(NavigationEvent.NavigateToHome(user.user))
                 } else {

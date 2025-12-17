@@ -9,12 +9,13 @@ sealed class Rutas(val rutaBase: String, val argumento: String? = null) {
     object ValidarCarnet : Rutas("validar_carnet")
     object RecuperarContrasena : Rutas("recuperar_contrasena")
     object Inicio : Rutas("inicio", "user")
-    object Servicios : Rutas("servicios", "esInvitado")
+
+    object Servicios : Rutas("servicios")
+
     object FirmarDocumento : Rutas("firmar_documento")
-
     object Perfil : Rutas("perfil")
-
     object BackOffice : Rutas("backoffice")
+    object Estadisticas : Rutas("estadisticas")
 
     object Comprar : Rutas("comprar/{nombreServicio}/{precioServicio}") {
         fun crearRuta(nombre: String, precio: Int): String {

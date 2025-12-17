@@ -3,10 +3,10 @@ package com.example.veritrustmobile.model
 import com.google.gson.annotations.SerializedName
 
 data class User(
-    @SerializedName("user")       // Coincide con backend @JsonProperty("user")
+    @SerializedName("user")
     val user: String,
 
-    @SerializedName("password")   // Coincide con backend @JsonProperty("password")
+    @SerializedName("password")
     val password: String,
 
     @SerializedName("rut")
@@ -15,15 +15,19 @@ data class User(
     @SerializedName("nombre")
     val nombre: String = "",
 
-    @SerializedName("fechaNacimiento") // Coincide con los métodos del backend
+    @SerializedName("fechaNacimiento")
     val fechaNacimiento: String = "",
 
     @SerializedName("telefono")
     val telefono: String = "",
 
-    @SerializedName("region")     // ¡Esto hará que se vea en el Perfil!
+    @SerializedName("region")
     val region: String = "",
 
-    @SerializedName("genero")     // ¡Esto hará que se vea en el Perfil!
-    val genero: String = ""
+    @SerializedName("genero")
+    val genero: String = "",
+
+    // ⭐ NUEVO: Campo de rol
+    @SerializedName("rol")
+    val rol: String = "user"
 )

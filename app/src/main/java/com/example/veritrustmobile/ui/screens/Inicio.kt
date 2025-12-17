@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.veritrustmobile.SessionManager
 import com.example.veritrustmobile.navigation.Rutas
 import com.example.veritrustmobile.ui.theme.VeriTrustMobileTheme
 
@@ -67,7 +68,10 @@ fun Inicio(navController: NavHostController, user: String?) {
             ) { Text("Registrarse") }
 
             TextButton(onClick = {
-                navController.navigate(Rutas.Servicios.crearRuta(valorArgumento = true))
+                SessionManager.saveRol("invitado")
+                navController.navigate(Rutas.Servicios.ruta) {
+                    popUpTo(Rutas.Inicio.ruta) { inclusive = true }
+                }
             }) {
                 Text("Continuar como invitado")
             }
