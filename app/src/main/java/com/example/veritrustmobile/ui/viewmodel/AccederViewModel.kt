@@ -5,11 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.veritrustmobile.SessionManager // Importar el Manager
+import com.example.veritrustmobile.SessionManager
 import com.example.veritrustmobile.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import java.io.IOException
+import java.net.UnknownHostException
 
 class AccederViewModel : ViewModel() {
 
@@ -50,13 +52,16 @@ class AccederViewModel : ViewModel() {
 
                 if (user != null) {
                     SessionManager.saveToken(user.user)
-
                     _navigationEvent.emit(NavigationEvent.NavigateToHome(user.user))
                 } else {
                     loginError = "El correo o la contraseña no coinciden."
                 }
+            } catch (e: UnknownHostException) {
+                loginError = "No hay conexión a internet. Revisa tu red."
+            } catch (e: IOException) {
+                loginError = "Error de red. Inténtalo de nuevo."
             } catch (e: Exception) {
-                loginError = "Error de conexión. Inténtalo más tarde."
+                loginError = "Ocurrió un error inesperado. Inténtalo más tarde."
             } finally {
                 isLoading = false
             }
