@@ -16,7 +16,6 @@ import androidx.navigation.navArgument
 import com.example.veritrustmobile.SessionManager
 import com.example.veritrustmobile.ui.screens.*
 import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
-import com.example.veritrustmobile.ui.viewmodel.ServiciosViewModel
 
 @Composable
 fun NavGraph(
@@ -28,6 +27,7 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
+        // ANIMACIONES GLOBALES
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) + fadeOut() },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) + fadeIn() },
@@ -48,12 +48,11 @@ fun NavGraph(
         composable(route = Rutas.Servicios.ruta) {
             val serviciosViewModel: ServiciosViewModel = viewModel()
             ServiciosScreen(
-                navController = navController,
-                viewModel = serviciosViewModel
+                navController = navController
             )
         }
 
-        // ⭐ COMPRAR - Control de acceso mejorado
+        // COMPRAR
         composable(
             route = "comprar/{nombreServicio}/{precioServicio}",
             arguments = listOf(
@@ -78,11 +77,12 @@ fun NavGraph(
             }
         }
 
+        // FIRMAR DOCUMENTO
         composable(Rutas.FirmarDocumento.ruta) {
             FirmarDocumentoScreen(navController = navController)
         }
 
-        // ⭐ PERFIL - Con protección de acceso
+        // PERFIL
         composable(Rutas.Perfil.ruta) {
             val rol = SessionManager.getRol()
 

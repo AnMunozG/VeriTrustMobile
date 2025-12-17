@@ -1,5 +1,6 @@
 package com.example.veritrustmobile.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,15 +12,16 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -37,12 +39,19 @@ enum class DialogState {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackOfficeScreen(
-    navController: NavController,
-    viewModel: BackOfficeViewModel = viewModel()
+    navController: NavController
 ) {
+    val context = LocalContext.current.applicationContext as Application
+    val viewModel: BackOfficeViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return BackOfficeViewModel(context) as T
+            }
+        }
+    )
+
     val uiState by viewModel.uiState.collectAsState()
     var servicioParaEliminar by remember { mutableStateOf<Servicio?>(null) }
-
     var servicioEnEdicion by remember { mutableStateOf<Servicio?>(null) }
     var dialogState by remember { mutableStateOf(DialogState.NONE) }
 
@@ -55,7 +64,9 @@ fun BackOfficeScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        servicioParaEliminar?.id?.let { viewModel.eliminarServicio(it.toString()) }
+                        servicioParaEliminar?.let { 
+                            viewModel.eliminarServicio(it.id.toString()) 
+                        }
                         servicioParaEliminar = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
@@ -67,7 +78,6 @@ fun BackOfficeScreen(
         )
     }
 
-    // Diálogo para Crear o Editar Servicio
     if (dialogState != DialogState.NONE) {
         val servicioActual = if (dialogState == DialogState.EDIT) servicioEnEdicion else null
         ServicioFormDialog(
@@ -78,8 +88,8 @@ fun BackOfficeScreen(
                 if (dialogState == DialogState.CREATE) {
                     viewModel.crearServicio(servicioActualizado)
                 } else {
-                    servicioActual?.id?.let { id ->
-                        viewModel.actualizarServicio(id.toString(), servicioActualizado)
+                    servicioActual?.let {
+                        viewModel.actualizarServicio(it.id.toString(), servicioActualizado)
                     }
                 }
                 dialogState = DialogState.NONE
@@ -131,7 +141,7 @@ fun BackOfficeScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(state.servicios, key = { it.id ?: -1 }) { servicio ->
+                            items(state.servicios, key = { it.id }) { servicio ->
                                 ServicioAdminCard(
                                     servicio = servicio,
                                     onEditClick = {
@@ -170,7 +180,7 @@ fun ServicioAdminCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(servicio.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "ID: ${servicio.id ?: "N/A"}",
+                    text = "ID: ${servicio.id}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -252,7 +262,7 @@ fun ServicioFormDialog(
                     Button(
                         onClick = {
                             val servicioActualizado = Servicio(
-                                id = if (dialogState == DialogState.CREATE) null else servicio?.id,
+                                id = if (dialogState == DialogState.CREATE) 0 else servicio?.id ?: 0,
                                 nombre = nombre,
                                 descripcion = descripcion,
                                 precio = precio.toInt(),
@@ -274,14 +284,8 @@ fun ServicioFormDialog(
 @Composable
 fun BackOfficeScreenPreview() {
     VeriTrustMobileTheme {
-        BackOfficeScreen(navController = rememberNavController())
-    }
-}
-
-@Preview
-@Composable
-fun ServicioFormDialogCreatePreview() {
-    VeriTrustMobileTheme {
-        ServicioFormDialog(dialogState = DialogState.CREATE, servicio = null, onDismiss = {}, onConfirm = {})
+        BackOfficeScreen(
+            navController = rememberNavController()
+        )
     }
 }

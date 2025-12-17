@@ -1,42 +1,57 @@
 package com.example.veritrustmobile.repository
 
-import com.example.veritrustmobile.data.RetrofitClient
 import com.example.veritrustmobile.model.Servicio
+import com.example.veritrustmobile.data.RetrofitClient
+import com.example.veritrustmobile.data.local.ServicioDao
+import kotlinx.coroutines.flow.firstOrNull
 
-class ServicesRepository {
-    private val api = RetrofitClient.api
+class ServicesRepository(private val servicioDao: ServicioDao) {
+
+    suspend fun getAllServices(): List<Servicio> {
+        return try {
+            val response = RetrofitClient.api.getServicios()
+
+            if (response.isSuccessful) {
+                val services = response.body() ?: emptyList()
+                // Guardar en la base de datos local para uso offline
+                if (services.isNotEmpty()) {
+                    servicioDao.deleteAll()
+                    servicioDao.insertServicios(services)
+                }
+                services
+            } else {
+                // Si la API falla (ej. error 500), intentamos cargar de la DB local
+                servicioDao.getAllServicios().firstOrNull() ?: emptyList()
+            }
+        } catch (e: Exception) {
+            // Si no hay conexión (IOException), cargamos de la DB local
+            println("Error de conexión, cargando desde cache: ${e.message}")
+            servicioDao.getAllServicios().firstOrNull() ?: emptyList()
+        }
+    }
 
     suspend fun getServicios(): List<Servicio> {
-        val response = api.getServicios()
-        if (response.isSuccessful) {
-            return response.body() ?: emptyList()
-        } else {
-            throw Exception("Error API ${response.code()}: No se pudieron obtener los servicios.")
+        return getAllServices()
+    }
+
+    suspend fun crearServicio(servicio: Servicio) {
+        val response = RetrofitClient.api.crearServicio(servicio)
+        if (!response.isSuccessful) {
+            throw Exception("Error al crear servicio: ${response.code()}")
         }
     }
 
-    suspend fun crearServicio(servicio: Servicio): Servicio {
-        val response = api.crearServicio(servicio)
-        if (response.isSuccessful) {
-            return response.body()!!
-        } else {
-            throw Exception("Error API ${response.code()}: No se pudo crear el servicio.")
-        }
-    }
-
-    suspend fun actualizarServicio(id: String, servicio: Servicio): Servicio {
-        val response = api.actualizarServicio(id, servicio)
-        if (response.isSuccessful) {
-            return response.body()!!
-        } else {
-            throw Exception("Error API ${response.code()}: No se pudo actualizar el servicio.")
+    suspend fun actualizarServicio(id: String, servicio: Servicio) {
+        val response = RetrofitClient.api.actualizarServicio(id, servicio)
+        if (!response.isSuccessful) {
+            throw Exception("Error al actualizar servicio: ${response.code()}")
         }
     }
 
     suspend fun eliminarServicio(id: String) {
-        val response = api.eliminarServicio(id)
+        val response = RetrofitClient.api.eliminarServicio(id)
         if (!response.isSuccessful) {
-            throw Exception("Error API ${response.code()}: No se pudo eliminar el servicio.")
+            throw Exception("Error al eliminar servicio: ${response.code()}")
         }
     }
 }

@@ -1,38 +1,41 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.veritrustmobile.data.local.AppDatabase
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.repository.ServicesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-sealed class UiState<out T> {
-    object Loading : UiState<Nothing>()
-    data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
+sealed class UiState {
+    object Loading : UiState()
+    data class Success(val data: List<Servicio>) : UiState()
+    data class Error(val message: String) : UiState()
 }
 
-class ServiciosViewModel : ViewModel() {
+class ServiciosViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val servicesRepository = ServicesRepository()
+    private val database = AppDatabase.getDatabase(application)
+    private val servicesRepository = ServicesRepository(database.servicioDao())
 
-    private val _servicesState = MutableStateFlow<UiState<List<Servicio>>>(UiState.Loading)
+    private val _servicesState = MutableStateFlow<UiState>(UiState.Loading)
     val servicesState = _servicesState.asStateFlow()
 
     init {
         loadServices()
     }
 
-    private fun loadServices() {
+    fun loadServices() {
         viewModelScope.launch {
             _servicesState.value = UiState.Loading
             try {
-                val servicesFromApi = servicesRepository.getServicios()
+                val servicesFromApi = servicesRepository.getAllServices()
                 _servicesState.value = UiState.Success(servicesFromApi)
             } catch (e: Exception) {
-                _servicesState.value = UiState.Error(e.message ?: "Error desconocido")
+                _servicesState.value = UiState.Error(e.message ?: "Error al cargar servicios")
             }
         }
     }
