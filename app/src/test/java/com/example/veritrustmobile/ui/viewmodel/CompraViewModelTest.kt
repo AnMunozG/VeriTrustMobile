@@ -1,9 +1,8 @@
-package com.example.veritrustmobile
+package com.example.veritrustmobile.ui.viewmodel
 
-import com.example.veritrustmobile.ui.viewmodel.CompraViewModel
+import io.kotest.matchers.shouldBe
 import org.junit.Before
 import org.junit.Test
-import io.kotest.matchers.shouldBe
 
 class CompraViewModelTest {
 
