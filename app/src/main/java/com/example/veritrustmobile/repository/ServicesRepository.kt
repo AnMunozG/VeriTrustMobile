@@ -20,4 +20,29 @@ class ServicesRepository {
             emptyList()
         }
     }
+
+    suspend fun getServicios(): List<Servicio> {
+        return getAllServices()
+    }
+
+    suspend fun crearServicio(servicio: Servicio) {
+        val response = RetrofitClient.api.crearServicio(servicio)
+        if (!response.isSuccessful) {
+            throw Exception("Error al crear servicio: ${response.code()}")
+        }
+    }
+
+    suspend fun actualizarServicio(id: String, servicio: Servicio) {
+        val response = RetrofitClient.api.actualizarServicio(id, servicio)
+        if (!response.isSuccessful) {
+            throw Exception("Error al actualizar servicio: ${response.code()}")
+        }
+    }
+
+    suspend fun eliminarServicio(id: String) {
+        val response = RetrofitClient.api.eliminarServicio(id)
+        if (!response.isSuccessful) {
+            throw Exception("Error al eliminar servicio: ${response.code()}")
+        }
+    }
 }

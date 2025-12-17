@@ -76,7 +76,7 @@ fun ServiciosScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(services, key = { it.id ?: -1 }) { servicio ->
+                        items(services, key = { it.id }) { servicio ->
                             AnimatedVisibility(
                                 visible = true,
                                 enter = fadeIn(animationSpec = tween(durationMillis = 500)) +

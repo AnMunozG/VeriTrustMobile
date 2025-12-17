@@ -55,7 +55,9 @@ fun BackOfficeScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        servicioParaEliminar?.id?.let { viewModel.eliminarServicio(it.toString()) }
+                        servicioParaEliminar?.let { 
+                            viewModel.eliminarServicio(it.id.toString()) 
+                        }
                         servicioParaEliminar = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
@@ -78,8 +80,8 @@ fun BackOfficeScreen(
                 if (dialogState == DialogState.CREATE) {
                     viewModel.crearServicio(servicioActualizado)
                 } else {
-                    servicioActual?.id?.let { id ->
-                        viewModel.actualizarServicio(id.toString(), servicioActualizado)
+                    servicioActual?.let {
+                        viewModel.actualizarServicio(it.id.toString(), servicioActualizado)
                     }
                 }
                 dialogState = DialogState.NONE
@@ -131,7 +133,7 @@ fun BackOfficeScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(state.servicios, key = { it.id ?: -1 }) { servicio ->
+                            items(state.servicios, key = { it.id }) { servicio ->
                                 ServicioAdminCard(
                                     servicio = servicio,
                                     onEditClick = {
@@ -170,7 +172,7 @@ fun ServicioAdminCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(servicio.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "ID: ${servicio.id ?: "N/A"}",
+                    text = "ID: ${servicio.id}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -252,7 +254,7 @@ fun ServicioFormDialog(
                     Button(
                         onClick = {
                             val servicioActualizado = Servicio(
-                                id = if (dialogState == DialogState.CREATE) null else servicio?.id,
+                                id = if (dialogState == DialogState.CREATE) 0 else servicio?.id ?: 0,
                                 nombre = nombre,
                                 descripcion = descripcion,
                                 precio = precio.toInt(),
