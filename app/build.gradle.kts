@@ -2,12 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.veritrustmobile"
-    compileSdk = 36
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         applicationId = "com.example.veritrustmobile"
@@ -56,16 +57,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.compose)
-    
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,12 +65,21 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Tests
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // JUnit 4 (Estándar para Unit Tests)
     testImplementation("junit:junit:4.13.2")
+
+    // Mockito (Para crear objetos falsos)
     testImplementation("org.mockito:mockito-core:5.3.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     testImplementation("io.mockk:mockk:1.13.5")
+
+    // Kotest (Para aserciones legibles "shouldBe")
     testImplementation("io.kotest:kotest-assertions-core:5.6.2")
+
+    // Corrutinas Test (Vital para ViewModels)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

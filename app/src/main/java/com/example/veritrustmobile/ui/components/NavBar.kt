@@ -47,6 +47,17 @@ fun NavBar(
             Text("Nosotros")
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // --- 4. BACKOFFICE ---
+        TextButton(onClick = {
+            navController.navigate(Rutas.BackOffice.ruta)
+            closeDrawer()
+        }) {
+            Text("BackOffice")
+        }
+
+
         Spacer(Modifier.weight(1f))
 
         // --- CERRAR SESIÓN ---

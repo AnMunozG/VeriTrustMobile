@@ -35,7 +35,6 @@ fun PantallaCompra(
     precioServicio: Int = 0,
     viewModel: CompraViewModel = viewModel()
 ) {
-    // Cálculo de IVA (19%)
     val tasaIVA = 0.19
     val montoIva = (precioServicio * tasaIVA).roundToInt()
     val montoTotal = precioServicio + montoIva
@@ -44,7 +43,6 @@ fun PantallaCompra(
     var valorUF by remember { mutableStateOf("Cargando...") }
     var valorDolar by remember { mutableStateOf("Cargando...") }
 
-    // Navegación al completar compra
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { success ->
             if (success) {
@@ -94,7 +92,6 @@ fun PantallaCompra(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // TARJETA DE RESUMEN
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(2.dp),
@@ -109,7 +106,6 @@ fun PantallaCompra(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Detalle de montos
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Valor Neto:", style = MaterialTheme.typography.bodyLarge)
                         Text(formatador.format(precioServicio), style = MaterialTheme.typography.bodyLarge)
@@ -164,7 +160,6 @@ fun PantallaCompra(
             Spacer(modifier = Modifier.height(8.dp))
             Text("Datos de Tarjeta", style = MaterialTheme.typography.headlineSmall)
 
-            // CAMPOS DE TEXTO
             OutlinedTextField(
                 value = viewModel.cardName,
                 onValueChange = viewModel::onCardNameChange,
@@ -174,14 +169,13 @@ fun PantallaCompra(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
-            // NÚMERO DE TARJETA (VISIBLE)
             OutlinedTextField(
                 value = viewModel.cardNumber,
                 onValueChange = viewModel::onCardNumberChange,
                 label = { Text("Número de tarjeta") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                visualTransformation = VisualTransformation.None, // ¡SE VEN LOS NÚMEROS!
+                visualTransformation = VisualTransformation.None,
                 singleLine = true
             )
 
@@ -204,7 +198,6 @@ fun PantallaCompra(
                 )
             }
 
-            // CVV (VISIBLE TAMBIÉN, SEGÚN PETICIÓN)
             OutlinedTextField(
                 value = viewModel.cvv,
                 onValueChange = viewModel::onCvvChange,
@@ -214,8 +207,7 @@ fun PantallaCompra(
                 visualTransformation = VisualTransformation.None, // ¡SE VEN LOS NÚMEROS!
                 singleLine = true
             )
-
-            // MENSAJES DE ERROR
+            
             viewModel.uiMessage?.let {
                 Text(
                     text = it,
@@ -225,8 +217,7 @@ fun PantallaCompra(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // BOTÓN DE PAGO
+            
             if (viewModel.isLoading) {
                 CircularProgressIndicator()
             } else {

@@ -1,39 +1,28 @@
 package com.example.veritrustmobile.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.veritrustmobile.data.local.AppDatabase
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.repository.ServicesRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ServiciosViewModel(application: Application) : AndroidViewModel(application) {
+class ServiciosViewModel : ViewModel() {
 
-    private val repository: ServicesRepository
+    private val servicesRepository = ServicesRepository()
 
-    val servicesState: StateFlow<List<Servicio>>
+    private val _servicesState = MutableStateFlow<List<Servicio>>(emptyList())
+    val servicesState = _servicesState.asStateFlow()
 
     init {
-        val database = AppDatabase.getDatabase(application)
-        val servicioDao = database.servicioDao()
-        repository = ServicesRepository(servicioDao)
-
-        servicesState = repository.allServices.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-
-        refreshServices()
+        loadServices()
     }
 
-    fun refreshServices() {
+    private fun loadServices() {
         viewModelScope.launch {
-            repository.refreshServices()
+            val servicesFromApi = servicesRepository.getAllServices()
+            _servicesState.value = servicesFromApi
         }
     }
 }

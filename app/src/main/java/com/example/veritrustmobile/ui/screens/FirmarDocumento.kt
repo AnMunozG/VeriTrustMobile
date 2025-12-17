@@ -37,7 +37,6 @@ fun FirmarDocumentoScreen(navController: NavController) { // Ahora recibe NavCon
     var mensaje by remember { mutableStateOf("") }
     var isProcesando by remember { mutableStateOf(false) }
 
-    // Estado para controlar el botón de volver
     var firmaExitosa by remember { mutableStateOf(false) }
 
     val guardadorLauncher = rememberLauncherForActivityResult(
@@ -98,13 +97,11 @@ fun FirmarDocumentoScreen(navController: NavController) { // Ahora recibe NavCon
     ) {
         Text("Firma Digital", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
 
-        // Si ya terminamos, mostramos el botón de salida
         if (firmaExitosa) {
             Text("¡Documento firmado correctamente!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
 
             Button(
                 onClick = {
-                    // Vuelve al inicio y borra la pila de navegación para no volver al firma con "atrás"
                     navController.navigate(Rutas.Servicios.crearRuta(false)) {
                         popUpTo(Rutas.Inicio.ruta) { inclusive = false }
                     }
@@ -114,7 +111,6 @@ fun FirmarDocumentoScreen(navController: NavController) { // Ahora recibe NavCon
                 Text("Volver al Inicio")
             }
         } else {
-            // Flujo normal de firma
             Text("1. Selecciona un PDF de tu celular.", textAlign = TextAlign.Center)
             Button(onClick = { selectorLauncher.launch(arrayOf("application/pdf")) }) {
                 Text("Cargar PDF")
@@ -149,7 +145,6 @@ fun FirmarDocumentoScreen(navController: NavController) { // Ahora recibe NavCon
     }
 }
 
-// Función auxiliar (No cambia)
 fun firmarYGuardar(context: Context, inputUri: Uri, outputUri: Uri): Boolean {
     return try {
         val inputStream: InputStream? = context.contentResolver.openInputStream(inputUri)
