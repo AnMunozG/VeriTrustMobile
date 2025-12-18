@@ -107,6 +107,7 @@ fun ServiciosScreen(
                                         } else {
                                             // Si está logueado, permitir compra
                                             val rutaCompra = Rutas.Comprar.crearRuta(
+                                                servicioId = servicio.id,
                                                 nombre = servicio.nombre,
                                                 precio = servicio.precio
                                             )

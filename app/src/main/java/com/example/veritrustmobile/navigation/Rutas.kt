@@ -17,9 +17,9 @@ sealed class Rutas(val rutaBase: String, val argumento: String? = null) {
     object BackOffice : Rutas("backoffice")
     object Estadisticas : Rutas("estadisticas")
 
-    object Comprar : Rutas("comprar/{nombreServicio}/{precioServicio}") {
-        fun crearRuta(nombre: String, precio: Int): String {
-            return "comprar/$nombre/$precio"
+    object Comprar : Rutas("comprar/{servicioId}/{nombreServicio}/{precioServicio}") {
+        fun crearRuta(servicioId: Int,nombre: String, precio: Int): String {
+            return "comprar/$servicioId/$nombre/$precio"
         }
     }
 

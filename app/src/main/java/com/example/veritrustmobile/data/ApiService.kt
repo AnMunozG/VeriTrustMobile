@@ -3,6 +3,7 @@ package com.example.veritrustmobile.data
 import com.example.veritrustmobile.model.Documento
 import com.example.veritrustmobile.model.Servicio
 import com.example.veritrustmobile.model.User
+import com.example.veritrustmobile.model.Compra
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -10,6 +11,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.PUT
 import retrofit2.http.DELETE
+
 interface ApiService {
 
     @POST("usuarios")
@@ -17,7 +19,7 @@ interface ApiService {
 
     @POST("usuarios/login")
     suspend fun login(@Body request: User): Response<User>
-    
+
     @GET("servicios")
     suspend fun getServicios(): Response<List<Servicio>>
 
@@ -42,4 +44,13 @@ interface ApiService {
     @DELETE("servicios/{id}")
     suspend fun eliminarServicio(@Path("id") id: String): Response<Unit>
 
+    // ⭐ ENDPOINTS DE COMPRAS
+    @GET("compras")
+    suspend fun getAllCompras(): Response<List<Compra>>
+
+    @POST("compras")
+    suspend fun crearCompra(@Body compra: Compra): Response<Compra>
+
+    @GET("compras/usuario/{usuarioId}")
+    suspend fun getComprasByUsuario(@Path("usuarioId") usuarioId: Long): Response<List<Compra>>
 }

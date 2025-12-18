@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation // Importante para quitar la máscara
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -31,6 +31,7 @@ import kotlin.math.roundToInt
 @Composable
 fun PantallaCompra(
     navController: NavController,
+    servicioId: Int,
     nombreServicio: String = "Servicio",
     precioServicio: Int = 0,
     viewModel: CompraViewModel = viewModel()
@@ -39,10 +40,19 @@ fun PantallaCompra(
     val montoIva = (precioServicio * tasaIVA).roundToInt()
     val montoTotal = precioServicio + montoIva
 
-    // Estados para la API Externa
+    // ⭐ Pasar información de la compra al ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.setCompraInfo(
+            servicioId = servicioId,
+            montoTotal = montoTotal.toDouble()
+        )
+    }
+
+    // Estados para la API Externa (Indicadores económicos)
     var valorUF by remember { mutableStateOf("Cargando...") }
     var valorDolar by remember { mutableStateOf("Cargando...") }
 
+    // Escuchar eventos de navegación del ViewModel
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { success ->
             if (success) {
@@ -53,7 +63,7 @@ fun PantallaCompra(
         }
     }
 
-    // Llamada a API Externa (Indicadores)
+    // Llamada a API Externa (Indicadores UF y Dólar)
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             try {
@@ -92,6 +102,7 @@ fun PantallaCompra(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // CARD DEL RESUMEN DE COMPRA
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(2.dp),
@@ -106,19 +117,34 @@ fun PantallaCompra(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text("Valor Neto:", style = MaterialTheme.typography.bodyLarge)
                         Text(formatador.format(precioServicio), style = MaterialTheme.typography.bodyLarge)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text("IVA (19%):", style = MaterialTheme.typography.bodyLarge)
                         Text(formatador.format(montoIva), style = MaterialTheme.typography.bodyLarge)
                     }
 
                     Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Total a pagar:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Total a pagar:",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(
                             text = formatador.format(montoTotal),
                             style = MaterialTheme.typography.headlineSmall,
@@ -129,37 +155,63 @@ fun PantallaCompra(
                 }
             }
 
-            // WIDGET API EXTERNA
+            // WIDGET DE INDICADORES ECONÓMICOS
             Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Indicadores:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "Indicadores:",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     Row {
                         Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
-                            Text("UF: $valorUF", modifier = Modifier.padding(4.dp), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                "UF: $valorUF",
+                                modifier = Modifier.padding(4.dp),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Badge(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                            Text("USD: $valorDolar", modifier = Modifier.padding(4.dp), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                "USD: $valorDolar",
+                                modifier = Modifier.padding(4.dp),
+                                style = MaterialTheme.typography.labelSmall
+                            )
                         }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Datos de Tarjeta", style = MaterialTheme.typography.headlineSmall)
 
+            Text(
+                "Datos de Tarjeta",
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            // FORMULARIO DE TARJETA
             OutlinedTextField(
                 value = viewModel.cardName,
                 onValueChange = viewModel::onCardNameChange,
@@ -174,18 +226,27 @@ fun PantallaCompra(
                 onValueChange = viewModel::onCardNumberChange,
                 label = { Text("Número de tarjeta") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 visualTransformation = VisualTransformation.None,
                 singleLine = true
             )
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 OutlinedTextField(
                     value = viewModel.expirationMonth,
                     onValueChange = viewModel::onExpirationMonthChange,
                     label = { Text("Mes") },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                     singleLine = true
                 )
                 OutlinedTextField(
@@ -193,7 +254,10 @@ fun PantallaCompra(
                     onValueChange = viewModel::onExpirationYearChange,
                     label = { Text("Año") },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                     singleLine = true
                 )
             }
@@ -203,21 +267,29 @@ fun PantallaCompra(
                 onValueChange = viewModel::onCvvChange,
                 label = { Text("CVV") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                visualTransformation = VisualTransformation.None, // ¡SE VEN LOS NÚMEROS!
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                visualTransformation = VisualTransformation.None,
                 singleLine = true
             )
-            
-            viewModel.uiMessage?.let {
+
+            // MENSAJES DE ESTADO
+            viewModel.uiMessage?.let { mensaje ->
                 Text(
-                    text = it,
-                    color = if (it.contains("éxito")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    text = mensaje,
+                    color = if (mensaje.contains("éxito"))
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            
+
+            // BOTÓN DE PAGO
             if (viewModel.isLoading) {
                 CircularProgressIndicator()
             } else {

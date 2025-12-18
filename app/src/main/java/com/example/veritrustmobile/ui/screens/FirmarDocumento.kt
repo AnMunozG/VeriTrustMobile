@@ -102,8 +102,11 @@ fun FirmarDocumentoScreen(navController: NavController) { // Ahora recibe NavCon
 
             Button(
                 onClick = {
-                    navController.navigate(Rutas.Servicios.crearRuta(false)) {
-                        popUpTo(Rutas.Inicio.ruta) { inclusive = false }
+                    navController.navigate(Rutas.Inicio.ruta) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp)

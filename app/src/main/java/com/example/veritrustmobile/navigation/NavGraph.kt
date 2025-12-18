@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,13 +26,11 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        // ANIMACIONES GLOBALES
         enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }, animationSpec = tween(500)) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }, animationSpec = tween(500)) + fadeOut() },
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(500)) + fadeIn() },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }, animationSpec = tween(500)) + fadeOut() }
     ) {
-        // INICIO
         composable(
             route = Rutas.Inicio.ruta,
             arguments = listOf(navArgument("user") {
@@ -44,18 +41,14 @@ fun NavGraph(
             Inicio(navController = navController, user = user)
         }
 
-        // ⭐ SERVICIOS - SIN ARGUMENTOS, USA SessionManager directamente
         composable(route = Rutas.Servicios.ruta) {
-            val serviciosViewModel: ServiciosViewModel = viewModel()
-            ServiciosScreen(
-                navController = navController
-            )
+            ServiciosScreen(navController = navController)
         }
 
-        // COMPRAR
         composable(
-            route = "comprar/{nombreServicio}/{precioServicio}",
+            route = "comprar/{servicioId}/{nombreServicio}/{precioServicio}",
             arguments = listOf(
+                navArgument("servicioId") { type = NavType.IntType },
                 navArgument("nombreServicio") { type = NavType.StringType },
                 navArgument("precioServicio") { type = NavType.IntType }
             )
@@ -63,69 +56,65 @@ fun NavGraph(
             val rol = SessionManager.getRol()
 
             if (rol == "invitado") {
-                // ⭐ IMPORTANTE: Usar LaunchedEffect para evitar recomposiciones infinitas
-                LaunchedEffect(Unit) {
-                    navController.navigate(Rutas.Acceder.ruta) {
-                        popUpTo(Rutas.Servicios.ruta) { inclusive = false }
-                        launchSingleTop = true
-                    }
+                navController.navigate(Rutas.Acceder.ruta) {
+                    popUpTo(Rutas.Servicios.ruta) { inclusive = false }
+                    launchSingleTop = true
                 }
             } else {
+                // ⭐ 3. RECUPERAR el ID del servicio
+                val id = backStackEntry.arguments?.getInt("servicioId") ?: 1
                 val nombre = backStackEntry.arguments?.getString("nombreServicio") ?: "Servicio"
                 val precio = backStackEntry.arguments?.getInt("precioServicio") ?: 0
-                PantallaCompra(navController = navController, nombreServicio = nombre, precioServicio = precio)
+
+                // ⭐ 4. PASAR el ID a PantallaCompra
+                PantallaCompra(
+                    navController = navController,
+                    servicioId = id, // <-- Pasa el ID aquí
+                    nombreServicio = nombre,
+                    precioServicio = precio
+                )
             }
         }
 
-        // FIRMAR DOCUMENTO
         composable(Rutas.FirmarDocumento.ruta) {
             FirmarDocumentoScreen(navController = navController)
         }
 
-        // PERFIL
         composable(Rutas.Perfil.ruta) {
             val rol = SessionManager.getRol()
 
             if (rol == "invitado") {
-                LaunchedEffect(Unit) {
-                    navController.navigate(Rutas.Acceder.ruta) {
-                        popUpTo(Rutas.Servicios.ruta) { inclusive = false }
-                        launchSingleTop = true
-                    }
+                navController.navigate(Rutas.Acceder.ruta) {
+                    popUpTo(Rutas.Servicios.ruta) { inclusive = false }
+                    launchSingleTop = true
                 }
             } else {
                 PerfilScreen(navController = navController)
             }
         }
 
-        // ⭐ ESTADÍSTICAS - Solo finanzas y admin
         composable(Rutas.Estadisticas.ruta) {
             val rol = SessionManager.getRol()
 
             if (rol == "finanzas" || rol == "admin") {
                 EstadisticasScreen()
             } else {
-                LaunchedEffect(Unit) {
-                    navController.navigate(Rutas.Servicios.ruta) {
-                        popUpTo(Rutas.Servicios.ruta) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                navController.navigate(Rutas.Servicios.ruta) {
+                    popUpTo(Rutas.Servicios.ruta) { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         }
 
-        // ⭐ BACKOFFICE - Solo admin
         composable(Rutas.BackOffice.ruta) {
             val rol = SessionManager.getRol()
 
             if (rol == "admin") {
                 BackOfficeScreen(navController = navController)
             } else {
-                LaunchedEffect(Unit) {
-                    navController.navigate(Rutas.Servicios.ruta) {
-                        popUpTo(Rutas.Servicios.ruta) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                navController.navigate(Rutas.Servicios.ruta) {
+                    popUpTo(Rutas.Servicios.ruta) { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         }
@@ -133,7 +122,6 @@ fun NavGraph(
         composable(Rutas.Nosotros.ruta) { Nosotros() }
         composable(Rutas.Acceder.ruta) { Acceder(navController = navController) }
         composable(Rutas.RecuperarContrasena.ruta) { RecuperarContrasenaScreen(navController = navController) }
-
         composable(Rutas.Registro.ruta) { RegistroScreen(navController = navController, viewModel = registroViewModel) }
         composable(Rutas.ValidarCarnet.ruta) { ValidarCarnetScreen(navController = navController, viewModel = registroViewModel) }
     }
