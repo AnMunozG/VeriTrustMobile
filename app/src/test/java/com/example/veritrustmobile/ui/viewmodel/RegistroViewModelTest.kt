@@ -1,14 +1,11 @@
-package com.example.veritrustmobile
+package com.example.veritrustmobile.ui.viewmodel
 
-import com.example.veritrustmobile.ui.viewmodel.RegistroViewModel
 import com.example.veritrustmobile.repository.AuthRepository
-
-import org.junit.Before
-import org.junit.Test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-// CAMBIO: Usamos MockK en vez de Mockito
 import io.mockk.mockk
+import org.junit.Before
+import org.junit.Test
 
 class RegistroViewModelTest {
 
